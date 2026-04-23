@@ -1,343 +1,244 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import AppShell from '@/components/AppShell'
-import { useStore } from '@/lib/store'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
-  DollarSign, ShoppingCart, Truck, Users, TrendingUp, TrendingDown,
-  Clock, Package, Star, AlertTriangle, Utensils, ArrowUpRight, Calendar
+  ArrowRight, ChefHat, ConciergeBell, ShieldCheck, ShoppingBag, Store,
+  QrCode, Smartphone, Truck, ClipboardList, Sparkles, Zap, BarChart3,
+  Users, CheckCircle2, Star
 } from 'lucide-react'
-import {
-  AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar,
-  PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid
-} from 'recharts'
+import BrandLogo from '@/components/BrandLogo'
+import { useStore } from '@/lib/store'
 
-function formatBRL(v: number) {
-  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+const profiles = [
+  {
+    role: 'cliente',
+    title: 'Cliente',
+    desc: 'Peça pelo QR Code da mesa, acompanhe seu pedido e veja sua comanda em tempo real.',
+    icon: Smartphone,
+    color: 'from-orange-400 to-orange-600',
+    href: '/login?role=cliente',
+  },
+  {
+    role: 'garcom',
+    title: 'Garçom',
+    desc: 'Mesas, comandas, pedidos prontos pra entregar e fechamento de conta.',
+    icon: ConciergeBell,
+    color: 'from-teal-500 to-teal-700',
+    href: '/login?role=garcom',
+  },
+  {
+    role: 'cozinha',
+    title: 'Cozinha (KDS)',
+    desc: 'Pedidos em produção, ingredientes, cronômetro, prioridade salão/delivery/balcão.',
+    icon: ChefHat,
+    color: 'from-red-500 to-orange-600',
+    href: '/login?role=cozinha',
+  },
+  {
+    role: 'gerente',
+    title: 'Gerente',
+    desc: 'Dashboard completo: vendas, financeiro, estoque, CRM, relatórios, funcionários.',
+    icon: BarChart3,
+    color: 'from-teal-600 to-emerald-600',
+    href: '/login?role=gerente',
+  },
+  {
+    role: 'super-admin',
+    title: 'Super Admin',
+    desc: 'Visão multi-restaurante, métricas globais, gestão de unidades e franqueados.',
+    icon: ShieldCheck,
+    color: 'from-purple-600 to-indigo-700',
+    href: '/login?role=super-admin',
+  },
+]
 
-export default function Dashboard() {
+const features = [
+  { icon: QrCode, title: 'Cardápio QR por mesa', desc: 'Cliente escaneia, identifica a mesa e pede sem app' },
+  { icon: ChefHat, title: 'Cozinha integrada', desc: 'Pedidos chegam por canal (salão / delivery / balcão) com ingredientes' },
+  { icon: ConciergeBell, title: 'Garçom 360°', desc: 'Sabe quando entregar, abre cardápio na mesa, fecha conta' },
+  { icon: Truck, title: 'Delivery próprio', desc: 'Entregadores, rotas, taxa por bairro, integrado com cozinha' },
+  { icon: BarChart3, title: 'Dashboard real-time', desc: 'Vendas, DRE, ticket médio, top produtos — tudo num só lugar' },
+  { icon: Sparkles, title: 'CRM + Promoções', desc: 'Clientes VIP, fidelidade, cupons, campanhas segmentadas' },
+]
+
+export default function Landing() {
   const [mounted, setMounted] = useState(false)
-  const store = useStore()
+  const authUser = useStore(s => s.authUser)
 
   useEffect(() => setMounted(true), [])
 
-  if (!mounted) return <AppShell title="Dashboard"><div /></AppShell>
-
-  const { orders, deliveries, inventory, customers, transactions } = store
-
-  // KPIs
-  const today = new Date().toDateString()
-  const todayIncome = transactions
-    .filter(t => t.type === 'income' && new Date(t.date).toDateString() === today)
-    .reduce((s, t) => s + t.amount, 0)
-
-  const todayExpense = transactions
-    .filter(t => t.type === 'expense' && new Date(t.date).toDateString() === today)
-    .reduce((s, t) => s + t.amount, 0)
-
-  const activeOrders = orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status)).length
-  const activeDeliveries = deliveries.filter(d => ['pending', 'assigned', 'in-transit'].includes(d.status)).length
-  const lowStock = inventory.filter(i => i.currentStock <= i.minStock).length
-  const vipCustomers = customers.filter(c => c.tags?.includes('VIP')).length
-
-  // Sales trend - last 7 days
-  const salesTrend = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date()
-    date.setDate(date.getDate() - (6 - i))
-    const dateStr = date.toDateString()
-    const total = transactions
-      .filter(t => t.type === 'income' && new Date(t.date).toDateString() === dateStr)
-      .reduce((s, t) => s + t.amount, 0)
-    return {
-      day: date.toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3).toUpperCase(),
-      vendas: Math.round(total),
-    }
-  })
-
-  // Sales by type
-  const salesByType = [
-    { name: 'Balcão', value: transactions.filter(t => t.category === 'Vendas Balcão').reduce((s, t) => s + t.amount, 0), color: '#0B7B8C' },
-    { name: 'Delivery', value: transactions.filter(t => t.category === 'Vendas Delivery').reduce((s, t) => s + t.amount, 0), color: '#FF7A00' },
-    { name: 'Salão', value: transactions.filter(t => t.category === 'Vendas Salão').reduce((s, t) => s + t.amount, 0), color: '#8b5cf6' },
-  ]
-
-  // Top items
-  const itemCounts: Record<string, { name: string; count: number; total: number; emoji: string }> = {}
-  orders.forEach(o => {
-    o.items.forEach(item => {
-      if (!itemCounts[item.menuItemId]) {
-        itemCounts[item.menuItemId] = { name: item.name, count: 0, total: 0, emoji: item.emoji || '🍽️' }
-      }
-      itemCounts[item.menuItemId].count += item.quantity
-      itemCounts[item.menuItemId].total += item.price * item.quantity
-    })
-  })
-  const topItems = Object.values(itemCounts).sort((a, b) => b.count - a.count).slice(0, 5)
-
-  // Hourly distribution (simulated)
-  const hourlyData = Array.from({ length: 12 }, (_, i) => ({
-    hora: `${11 + i}h`,
-    pedidos: Math.round(3 + Math.random() * 15 + (i === 1 || i === 2 || i === 8 || i === 9 ? 10 : 0)),
-  }))
-
   return (
-    <AppShell title="Dashboard" subtitle="Visão geral do seu restaurante">
-      <div className="space-y-6">
-        {/* Welcome banner */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative bg-gradient-to-r from-teal-600 via-teal-500 to-orange-500 rounded-2xl p-6 text-white overflow-hidden"
-        >
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <p className="text-white/80 text-sm mb-1">Bem-vindo de volta, Marcelo! 👋</p>
-              <h2 className="text-2xl font-bold">{store.restaurant.name}</h2>
-              <p className="text-white/90 text-sm mt-2">
-                Hoje você teve <span className="font-bold">{formatBRL(todayIncome)}</span> em vendas
-              </p>
-            </div>
-            <div className="hidden md:block text-right">
-              <p className="text-white/70 text-xs">Aberto</p>
-              <p className="font-bold text-lg">{store.restaurant.openTime} - {store.restaurant.closeTime}</p>
-              <div className="inline-flex items-center gap-1 bg-green-400/20 px-2 py-0.5 rounded-full mt-1">
-                <div className="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse" />
-                <span className="text-xs font-semibold">AO VIVO</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard
-            title="Vendas Hoje"
-            value={formatBRL(todayIncome)}
-            change="+18.2%"
-            trend="up"
-            icon={<DollarSign />}
-            gradient="from-green-500 to-emerald-600"
-          />
-          <KPICard
-            title="Pedidos Ativos"
-            value={activeOrders.toString()}
-            subtitle={`${orders.length} no total`}
-            icon={<ShoppingCart />}
-            gradient="from-orange-500 to-amber-600"
-            pulse={activeOrders > 0}
-          />
-          <KPICard
-            title="Entregas em Rota"
-            value={activeDeliveries.toString()}
-            subtitle="Em andamento"
-            icon={<Truck />}
-            gradient="from-blue-500 to-indigo-600"
-          />
-          <KPICard
-            title="Lucro Líquido"
-            value={formatBRL(todayIncome - todayExpense)}
-            change={`Despesas: ${formatBRL(todayExpense)}`}
-            icon={<TrendingUp />}
-            gradient="from-teal-500 to-cyan-600"
-          />
-        </div>
-
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Sales Trend */}
-          <div className="lg:col-span-2 card p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-bold text-gray-900">Vendas da Semana</h3>
-                <p className="text-xs text-gray-500">Faturamento diário</p>
-              </div>
-              <div className="flex gap-2">
-                <button className="text-xs px-3 py-1 bg-teal-50 text-teal-700 rounded-lg font-semibold">7 dias</button>
-                <button className="text-xs px-3 py-1 text-gray-500 rounded-lg">30 dias</button>
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={salesTrend}>
-                <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0B7B8C" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#0B7B8C" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="day" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `R$${Math.round(v / 1000)}k`} />
-                <Tooltip
-                  formatter={(v: any) => formatBRL(v)}
-                  contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-                />
-                <Area type="monotone" dataKey="vendas" stroke="#0B7B8C" strokeWidth={2} fill="url(#colorSales)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Sales by Type */}
-          <div className="card p-6">
-            <h3 className="font-bold text-gray-900 mb-1">Canal de Vendas</h3>
-            <p className="text-xs text-gray-500 mb-4">Distribuição</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={salesByType}
-                  innerRadius={55}
-                  outerRadius={80}
-                  dataKey="value"
-                  paddingAngle={3}
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-30">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <BrandLogo size={36} />
+          </Link>
+          <div className="flex items-center gap-2">
+            {mounted && authUser ? (
+              <Link
+                href={
+                  authUser.role === 'cliente' ? '/cliente' :
+                  authUser.role === 'garcom' ? '/garcom' :
+                  authUser.role === 'cozinha' ? '/cozinha' :
+                  authUser.role === 'super-admin' ? '/super-admin' : '/painel'
+                }
+                className="px-4 py-2 bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-lg font-bold text-sm flex items-center gap-2"
+              >
+                Voltar pro painel <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <>
+                <Link href="/cardapio/public" className="hidden sm:inline-flex px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-50 rounded-lg">
+                  Ver cardápio
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-lg font-bold text-sm flex items-center gap-2"
                 >
-                  {salesByType.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v: any) => formatBRL(v)} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="space-y-2 mt-2">
-              {salesByType.map(s => (
-                <div key={s.name} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ background: s.color }} />
-                    <span className="text-gray-600">{s.name}</span>
-                  </div>
-                  <span className="font-semibold">{formatBRL(s.value)}</span>
-                </div>
-              ))}
-            </div>
+                  Entrar <ArrowRight className="w-4 h-4" />
+                </Link>
+              </>
+            )}
           </div>
         </div>
+      </header>
 
-        {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Hourly Distribution */}
-          <div className="lg:col-span-2 card p-6">
-            <h3 className="font-bold text-gray-900 mb-1">Movimento por Horário</h3>
-            <p className="text-xs text-gray-500 mb-4">Pedidos ao longo do dia</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="hora" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                <Bar dataKey="pedidos" fill="#FF7A00" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-teal-50 via-white to-orange-50" />
+        <div className="absolute top-20 right-10 w-72 h-72 bg-orange-200 rounded-full blur-3xl opacity-30" />
+        <div className="absolute bottom-10 left-10 w-72 h-72 bg-teal-200 rounded-full blur-3xl opacity-30" />
+
+        <div className="relative max-w-6xl mx-auto px-6 py-16 lg:py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+            className="text-center max-w-3xl mx-auto"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold mb-4 border border-orange-200">
+              <Sparkles className="w-3 h-3" />
+              MVP Demo · 100% funcional
+            </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.05] mb-5">
+              Tudo que seu <span className="text-teal-600">restaurante</span><br />
+              precisa numa <span className="text-orange-500">única plataforma</span>.
+            </h1>
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+              PDV, cardápio QR, cozinha integrada, garçom, delivery, financeiro, CRM e relatórios.
+              Cinco perfis prontos pra você testar agora.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/login"
+                className="px-6 py-3 bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 hover:shadow-lg transition-all"
+              >
+                Acessar a demo <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/cardapio/public"
+                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl font-bold text-base flex items-center justify-center gap-2 hover:border-teal-400"
+              >
+                <QrCode className="w-4 h-4" /> Ver cardápio
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 5 perfis */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-extrabold mb-2">5 perfis, 1 plataforma</h2>
+            <p className="text-gray-600">Escolha por onde quer entrar — todos com login pré-preenchido</p>
           </div>
-
-          {/* Top Items */}
-          <div className="card p-6">
-            <h3 className="font-bold text-gray-900 mb-1">Mais Pedidos</h3>
-            <p className="text-xs text-gray-500 mb-4">Top 5 itens</p>
-            <div className="space-y-3">
-              {topItems.map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="text-2xl">{item.emoji}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{item.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-teal-500 to-orange-500 rounded-full"
-                          style={{ width: `${(item.count / (topItems[0]?.count || 1)) * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-semibold text-gray-600">{item.count}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {profiles.map((p, i) => {
+              const Icon = p.icon
+              return (
+                <motion.div
+                  key={p.role}
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <Link
+                    href={p.href}
+                    className="group block bg-white rounded-2xl p-6 border border-gray-200 hover:border-teal-400 hover:shadow-xl transition-all h-full"
+                  >
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${p.color} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-6 h-6" />
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    <h3 className="text-xl font-bold mb-1">{p.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{p.desc}</p>
+                    <span className="inline-flex items-center gap-1 text-sm font-bold text-teal-600 group-hover:gap-2 transition-all">
+                      Entrar como {p.title.toLowerCase()} <ArrowRight className="w-3 h-3" />
+                    </span>
+                  </Link>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
+      </section>
 
-        {/* Quick alerts */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <AlertCard
-            icon={<AlertTriangle />}
-            color="amber"
-            title={`${lowStock} itens com estoque baixo`}
-            description="Revisar inventário"
-            href="/estoque"
-          />
-          <AlertCard
-            icon={<Star />}
-            color="purple"
-            title={`${vipCustomers} clientes VIP`}
-            description="Engajar com promoções"
-            href="/clientes"
-          />
-          <AlertCard
-            icon={<Clock />}
-            color="blue"
-            title={`${activeOrders} pedidos em preparo`}
-            description="Acompanhar em tempo real"
-            href="/comanda"
-          />
+      {/* Features */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-extrabold mb-2">O que tá pronto na demo</h2>
+            <p className="text-gray-600">15 telas, fluxo integrado de ponta a ponta</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f, i) => {
+              const Icon = f.icon
+              return (
+                <div key={i} className="flex gap-3 p-5 bg-white rounded-xl border border-gray-100">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-100 to-orange-100 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-5 h-5 text-teal-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-1">{f.title}</h3>
+                    <p className="text-xs text-gray-600">{f.desc}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
-      </div>
-    </AppShell>
-  )
-}
+      </section>
 
-function KPICard({
-  title, value, change, trend, subtitle, icon, gradient, pulse,
-}: {
-  title: string; value: string; change?: string; trend?: 'up' | 'down';
-  subtitle?: string; icon: React.ReactNode; gradient: string; pulse?: boolean
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2 }}
-      className="card p-5 relative overflow-hidden"
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
-          {change && (
-            <div className={`inline-flex items-center gap-1 text-xs font-semibold mt-2 ${trend === 'up' ? 'text-green-600' : 'text-gray-600'}`}>
-              {trend === 'up' && <TrendingUp className="w-3 h-3" />}
-              {change}
-            </div>
-          )}
-          {subtitle && <p className="text-xs text-gray-500 mt-2">{subtitle}</p>}
+      {/* Stats */}
+      <section className="py-12 bg-gradient-to-r from-teal-600 to-orange-500 text-white">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div><p className="text-4xl font-extrabold">15</p><p className="text-sm opacity-80">Telas</p></div>
+          <div><p className="text-4xl font-extrabold">5</p><p className="text-sm opacity-80">Perfis</p></div>
+          <div><p className="text-4xl font-extrabold">100%</p><p className="text-sm opacity-80">Funcional</p></div>
+          <div><p className="text-4xl font-extrabold">0</p><p className="text-sm opacity-80">Backend (demo)</p></div>
         </div>
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white relative`}>
-          {pulse && <div className="absolute inset-0 rounded-xl bg-white/30 animate-ping" />}
-          <div className="relative w-5 h-5">{icon}</div>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
+      </section>
 
-function AlertCard({
-  icon, color, title, description, href,
-}: { icon: React.ReactNode; color: string; title: string; description: string; href: string }) {
-  const colors: Record<string, string> = {
-    amber: 'bg-amber-50 text-amber-700 border-amber-200',
-    purple: 'bg-purple-50 text-purple-700 border-purple-200',
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-  }
-  return (
-    <a href={href} className={`card p-4 border flex items-center gap-3 hover:shadow-md transition-all group ${colors[color]}`}>
-      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-        <div className="w-5 h-5">{icon}</div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm truncate">{title}</p>
-        <p className="text-xs opacity-70 truncate">{description}</p>
-      </div>
-      <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-    </a>
+      {/* CTA final */}
+      <section className="py-16 text-center">
+        <div className="max-w-2xl mx-auto px-6">
+          <h2 className="text-3xl font-extrabold mb-3">Pronto pra ver funcionando?</h2>
+          <p className="text-gray-600 mb-6">Login leva 1 clique — todos os perfis já estão pré-preenchidos.</p>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-xl font-bold hover:shadow-2xl transition-all"
+          >
+            <Zap className="w-5 h-5" /> Acessar agora
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t border-gray-100 py-6 text-center text-xs text-gray-500">
+        <BrandLogo size={28} className="mx-auto mb-2" />
+        © 2026 GastroHub · MVP demo
+      </footer>
+    </div>
   )
 }

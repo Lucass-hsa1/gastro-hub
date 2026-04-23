@@ -205,3 +205,15 @@ export interface Restaurant {
   minOrderDelivery: number
   maxDeliveryDistance: number
 }
+
+export type UserRole = 'cliente' | 'garcom' | 'cozinha' | 'gerente' | 'super-admin'
+
+export interface AuthUser {
+  name: string
+  email: string
+  role: UserRole
+  avatar?: string
+  customerId?: string
+  employeeId?: string
+  loggedAt: string
+}

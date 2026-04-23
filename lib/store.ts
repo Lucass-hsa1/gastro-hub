@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 import type {
   MenuItem, Order, Table, Delivery, Driver, InventoryItem,
   Recipe, Customer, Employee, Transaction, Promotion, Restaurant,
-  OrderStatus, OrderItem, OrderType, PaymentMethod
+  OrderStatus, OrderItem, OrderType, PaymentMethod, AuthUser, UserRole
 } from './types'
 
 // ===== DEFAULT DATA =====
@@ -300,6 +300,11 @@ interface StoreState {
   promotions: Promotion[]
   restaurant: Restaurant
   nextOrderNumber: number
+  authUser: AuthUser | null
+
+  // Auth
+  login: (user: AuthUser) => void
+  logout: () => void
 
   // Menu Actions
   addMenuItem: (item: Omit<MenuItem, 'id'>) => void
@@ -384,6 +389,10 @@ export const useStore = create<StoreState>()(
       promotions: defaultPromotions,
       restaurant: defaultRestaurant,
       nextOrderNumber: 1005,
+      authUser: null,
+
+      login: (user) => set({ authUser: user }),
+      logout: () => set({ authUser: null }),
 
       addMenuItem: (item) => set(s => ({ menu: [...s.menu, { ...item, id: uid() }] })),
       updateMenuItem: (id, updates) => set(s => ({ menu: s.menu.map(m => m.id === id ? { ...m, ...updates } : m) })),

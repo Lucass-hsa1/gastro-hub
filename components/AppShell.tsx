@@ -1,9 +1,17 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Toaster } from 'react-hot-toast'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
-import { Toaster } from 'react-hot-toast'
-import { usePathname } from 'next/navigation'
+import { useStore } from '@/lib/store'
+
+function isPublic(pathname: string) {
+  if (pathname === '/' || pathname === '/login') return true
+  if (pathname.startsWith('/cardapio/public')) return true
+  return false
+}
 
 export default function AppShell({
   children,
@@ -15,8 +23,20 @@ export default function AppShell({
   subtitle?: string
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const authUser = useStore(s => s.authUser)
+  const [mounted, setMounted] = useState(false)
 
-  // Public menu fullscreen
+  useEffect(() => setMounted(true), [])
+
+  useEffect(() => {
+    if (!mounted) return
+    if (!authUser && !isPublic(pathname)) {
+      router.replace('/login')
+    }
+  }, [mounted, authUser, pathname, router])
+
+  // Cardápio público fullscreen
   if (pathname.startsWith('/cardapio/public')) {
     return (
       <>
@@ -24,6 +44,24 @@ export default function AppShell({
         <Toaster position="top-center" />
       </>
     )
+  }
+
+  // Landing/Login/Cliente/Super Admin têm header próprio
+  if (pathname === '/' || pathname === '/login' ||
+      pathname.startsWith('/cliente') || pathname.startsWith('/super-admin')) {
+    return (
+      <>
+        {children}
+        <Toaster position="top-right" toastOptions={{
+          style: { borderRadius: '10px', fontSize: '14px' }
+        }} />
+      </>
+    )
+  }
+
+  // Shell padrão (gerente, garçom, cozinha) — espera mount + auth pra evitar flash
+  if (!mounted || !authUser) {
+    return <div className="min-h-screen bg-gray-50" />
   }
 
   return (
