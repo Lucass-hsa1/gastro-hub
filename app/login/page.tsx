@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
   ArrowRight, ArrowLeft, ChefHat, ConciergeBell, ShieldCheck,
-  Smartphone, BarChart3, User, Lock, Mail, Sparkles
+  Smartphone, BarChart3, User, Lock, Mail, Sparkles, Bike
 } from 'lucide-react'
 import BrandLogo from '@/components/BrandLogo'
 import { useStore } from '@/lib/store'
@@ -40,6 +40,15 @@ const DEMOS: Record<UserRole, { email: string; password: string; name: string; s
     color: 'from-red-500 to-orange-600',
     home: '/cozinha',
   },
+  entregador: {
+    email: 'roberto@gastrohub.com',
+    password: 'gastro',
+    name: 'Roberto Souza',
+    subtitle: 'Entregador · entregas atribuídas, rota, ganhos do dia',
+    icon: Bike,
+    color: 'from-blue-500 to-cyan-600',
+    home: '/entregador',
+  },
   gerente: {
     email: 'marcelo@gastrohub.com',
     password: 'gastro',
@@ -64,6 +73,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   cliente: 'Cliente',
   garcom: 'Garçom',
   cozinha: 'Cozinha',
+  entregador: 'Entregador',
   gerente: 'Gerente',
   'super-admin': 'Super Admin',
 }
@@ -98,6 +108,7 @@ function LoginInner() {
       loggedAt: new Date().toISOString(),
       customerId: role === 'cliente' ? 'c1' : undefined,
       employeeId: role === 'garcom' ? 'e2' : role === 'cozinha' ? 'e3' : role === 'gerente' ? 'e1' : undefined,
+      driverId: role === 'entregador' ? 'd1' : undefined,
     })
     router.replace(d.home)
   }

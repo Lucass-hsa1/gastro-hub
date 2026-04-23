@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import {
   ArrowRight, ChefHat, ConciergeBell, ShieldCheck, ShoppingBag, Store,
   QrCode, Smartphone, Truck, ClipboardList, Sparkles, Zap, BarChart3,
-  Users, CheckCircle2, Star
+  Users, CheckCircle2, Star, Bike
 } from 'lucide-react'
 import BrandLogo from '@/components/BrandLogo'
 import { useStore } from '@/lib/store'
@@ -36,6 +36,14 @@ const profiles = [
     icon: ChefHat,
     color: 'from-red-500 to-orange-600',
     href: '/login?role=cozinha',
+  },
+  {
+    role: 'entregador',
+    title: 'Entregador',
+    desc: 'Aceite entregas, navegue até o cliente, acompanhe ganhos e status online em tempo real.',
+    icon: Bike,
+    color: 'from-blue-500 to-cyan-600',
+    href: '/login?role=entregador',
   },
   {
     role: 'gerente',
@@ -85,6 +93,7 @@ export default function Landing() {
                   authUser.role === 'cliente' ? '/cliente' :
                   authUser.role === 'garcom' ? '/garcom' :
                   authUser.role === 'cozinha' ? '/cozinha' :
+                  authUser.role === 'entregador' ? '/entregador' :
                   authUser.role === 'super-admin' ? '/super-admin' : '/painel'
                 }
                 className="px-4 py-2 bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-lg font-bold text-sm flex items-center gap-2"
@@ -153,7 +162,7 @@ export default function Landing() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold mb-2">5 perfis, 1 plataforma</h2>
+            <h2 className="text-3xl font-extrabold mb-2">6 perfis, 1 plataforma</h2>
             <p className="text-gray-600">Escolha por onde quer entrar — todos com login pré-preenchido</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -215,7 +224,7 @@ export default function Landing() {
       <section className="py-12 bg-gradient-to-r from-teal-600 to-orange-500 text-white">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div><p className="text-4xl font-extrabold">15</p><p className="text-sm opacity-80">Telas</p></div>
-          <div><p className="text-4xl font-extrabold">5</p><p className="text-sm opacity-80">Perfis</p></div>
+          <div><p className="text-4xl font-extrabold">6</p><p className="text-sm opacity-80">Perfis</p></div>
           <div><p className="text-4xl font-extrabold">100%</p><p className="text-sm opacity-80">Funcional</p></div>
           <div><p className="text-4xl font-extrabold">0</p><p className="text-sm opacity-80">Backend (demo)</p></div>
         </div>

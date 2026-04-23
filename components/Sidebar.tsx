@@ -52,6 +52,7 @@ const roleLabels: Record<UserRole, string> = {
   cliente: 'Cliente',
   garcom: 'Garçom',
   cozinha: 'Cozinha',
+  entregador: 'Entregador',
   gerente: 'Gerente',
   'super-admin': 'Super Admin',
 }
@@ -70,7 +71,8 @@ export default function Sidebar() {
     pathname === '/login' ||
     pathname.startsWith('/cardapio/public') ||
     pathname.startsWith('/cliente') ||
-    pathname.startsWith('/super-admin')
+    pathname.startsWith('/super-admin') ||
+    pathname.startsWith('/entregador')
   ) return null
 
   const visibleItems = menuItems.filter(item => {

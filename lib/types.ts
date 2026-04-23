@@ -206,7 +206,7 @@ export interface Restaurant {
   maxDeliveryDistance: number
 }
 
-export type UserRole = 'cliente' | 'garcom' | 'cozinha' | 'gerente' | 'super-admin'
+export type UserRole = 'cliente' | 'garcom' | 'cozinha' | 'gerente' | 'super-admin' | 'entregador'
 
 export interface AuthUser {
   name: string
@@ -215,5 +215,6 @@ export interface AuthUser {
   avatar?: string
   customerId?: string
   employeeId?: string
+  driverId?: string
   loggedAt: string
 }

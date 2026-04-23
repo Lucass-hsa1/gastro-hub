@@ -46,9 +46,10 @@ export default function AppShell({
     )
   }
 
-  // Landing/Login/Cliente/Super Admin têm header próprio
+  // Landing/Login/Cliente/Super Admin/Entregador têm header próprio
   if (pathname === '/' || pathname === '/login' ||
-      pathname.startsWith('/cliente') || pathname.startsWith('/super-admin')) {
+      pathname.startsWith('/cliente') || pathname.startsWith('/super-admin') ||
+      pathname.startsWith('/entregador')) {
     return (
       <>
         {children}
