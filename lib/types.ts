@@ -1,7 +1,8 @@
 // ===== TYPES =====
 
-export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'delivered' | 'canceled'
+export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'served' | 'delivered' | 'canceled'
 export type OrderType = 'dine-in' | 'delivery' | 'takeout' | 'counter'
+export type OrderSource = 'qr' | 'waiter' | 'pdv' | 'delivery' | 'counter'
 export type PaymentMethod = 'cash' | 'credit' | 'debit' | 'pix' | 'voucher'
 export type TableStatus = 'available' | 'occupied' | 'reserved' | 'cleaning'
 
@@ -28,6 +29,10 @@ export interface OrderItem {
   price: number
   notes?: string
   emoji?: string
+  prepTime?: number
+  // Per-item kitchen status — 'served' means waiter delivered to table
+  status?: OrderStatus
+  addedAt?: string
 }
 
 export interface Order {
@@ -48,6 +53,7 @@ export interface Order {
   updatedAt: string
   notes?: string
   waiterId?: string
+  source?: OrderSource
 }
 
 export interface Table {

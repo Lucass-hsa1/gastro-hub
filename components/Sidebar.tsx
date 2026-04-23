@@ -8,12 +8,15 @@ import clsx from 'clsx'
 import {
   LayoutDashboard, ShoppingCart, UtensilsCrossed, Truck, Users,
   DollarSign, Package, BookOpen, Contact, BarChart3, Briefcase,
-  Tag, Settings, ChevronLeft, Menu, QrCode, Bike, Soup, Store
+  Tag, Settings, ChevronLeft, Menu, QrCode, Bike, Soup, Store,
+  ChefHat, ConciergeBell
 } from 'lucide-react'
 
 const menuItems = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard', group: 'Principal' },
   { href: '/pdv', icon: UtensilsCrossed, label: 'PDV', group: 'Operação', badge: 'HOT' },
+  { href: '/garcom', icon: ConciergeBell, label: 'Garçom', group: 'Operação', badge: 'NEW' },
+  { href: '/cozinha', icon: ChefHat, label: 'Cozinha (KDS)', group: 'Operação', badge: 'NEW' },
   { href: '/comanda', icon: ShoppingCart, label: 'Comanda', group: 'Operação' },
   { href: '/mesas', icon: Store, label: 'Mesas', group: 'Operação' },
   { href: '/cardapio', icon: QrCode, label: 'Cardápio Virtual', group: 'Operação' },

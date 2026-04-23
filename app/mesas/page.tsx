@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import AppShell from '@/components/AppShell'
 import { useStore } from '@/lib/store'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Users, Clock, X, Eye, CheckCircle2, Utensils } from 'lucide-react'
+import { Users, Clock, X, Eye, CheckCircle2, Utensils, ClipboardList, ChefHat, ExternalLink, QrCode } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Link from 'next/link'
 import type { Table } from '@/lib/types'
 
 function formatBRL(v: number) {
@@ -156,7 +157,33 @@ export default function MesasPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-2 mt-6">
+                {/* Integração: cardápio na mesa, comanda cliente, ir pro garçom */}
+                <div className="mt-4 grid grid-cols-1 gap-2">
+                  <Link
+                    href={`/cardapio/public?mesa=${selected.number}&modo=garcom`}
+                    className="w-full py-2 bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2"
+                  >
+                    <ChefHat className="w-4 h-4" /> Abrir cardápio nesta mesa (garçom)
+                  </Link>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href={`/cardapio/public/comanda?mesa=${selected.number}`}
+                      target="_blank"
+                      className="py-2 bg-white border border-teal-300 text-teal-700 rounded-lg font-bold text-sm flex items-center justify-center gap-1"
+                    >
+                      <ClipboardList className="w-4 h-4" /> Comanda
+                    </Link>
+                    <Link
+                      href={`/cardapio/public?mesa=${selected.number}`}
+                      target="_blank"
+                      className="py-2 bg-white border border-orange-300 text-orange-600 rounded-lg font-bold text-sm flex items-center justify-center gap-1"
+                    >
+                      <QrCode className="w-4 h-4" /> Cardápio cliente
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-3">
                   {selected.status !== 'available' && (
                     <button
                       onClick={() => {

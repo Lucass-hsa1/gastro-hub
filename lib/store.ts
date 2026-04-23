@@ -311,6 +311,13 @@ interface StoreState {
   updateOrder: (id: string, updates: Partial<Order>) => void
   updateOrderStatus: (id: string, status: OrderStatus) => void
   deleteOrder: (id: string) => void
+  addItemsToOrder: (orderId: string, items: OrderItem[]) => void
+  createOrAppendTableOrder: (
+    tableId: string,
+    items: OrderItem[],
+    opts?: { source?: 'qr' | 'waiter'; customerName?: string; waiterId?: string }
+  ) => Order
+  closeTableBill: (tableId: string, paymentMethod: PaymentMethod) => void
 
   // Table Actions
   updateTable: (id: string, updates: Partial<Table>) => void
@@ -429,14 +436,10 @@ export const useStore = create<StoreState>()(
           orders: s.orders.map(o => o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o)
         }))
 
-        if (status === 'delivered') {
-          // Release table
-          if (order.tableId) {
-            set(s => ({
-              tables: s.tables.map(t => t.id === order.tableId ? { ...t, status: 'cleaning', currentOrderId: undefined } : t)
-            }))
-          }
-          // Record income if not already
+        // For dine-in: 'served' = waiter delivered to table (comanda stays open).
+        // 'delivered' here = closed/paid OR delivery dispatched. We only auto-release
+        // tables for non-dine-in orders; dine-in tables are released by closeTableBill.
+        if (status === 'delivered' && order.type !== 'dine-in') {
           const existing = get().transactions.find(t => t.relatedOrderId === id)
           if (!existing) {
             set(s => ({
@@ -455,6 +458,96 @@ export const useStore = create<StoreState>()(
         }
       },
       deleteOrder: (id) => set(s => ({ orders: s.orders.filter(o => o.id !== id) })),
+
+      addItemsToOrder: (orderId, items) => {
+        const now = new Date().toISOString()
+        const stamped = items.map(it => ({ ...it, addedAt: now, status: it.status ?? 'pending' as const }))
+        set(s => ({
+          orders: s.orders.map(o => {
+            if (o.id !== orderId) return o
+            const merged = [...o.items, ...stamped]
+            const subtotal = merged.reduce((sum, it) => sum + it.price * it.quantity, 0)
+            // Reopen kitchen status when new items come in
+            const newStatus: OrderStatus = (o.status === 'served' || o.status === 'ready' || o.status === 'delivered')
+              ? 'pending'
+              : o.status
+            return {
+              ...o,
+              items: merged,
+              subtotal,
+              total: subtotal - o.discount,
+              status: newStatus,
+              updatedAt: now,
+            }
+          })
+        }))
+      },
+
+      createOrAppendTableOrder: (tableId, items, opts) => {
+        const state = get()
+        const existing = state.orders.find(o =>
+          o.tableId === tableId &&
+          o.type === 'dine-in' &&
+          o.status !== 'delivered' &&
+          o.status !== 'canceled'
+        )
+        if (existing) {
+          get().addItemsToOrder(existing.id, items)
+          return get().orders.find(o => o.id === existing.id)!
+        }
+        const subtotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0)
+        const now = new Date().toISOString()
+        const stampedItems = items.map(it => ({ ...it, addedAt: now, status: 'pending' as const }))
+        return get().createOrder({
+          type: 'dine-in',
+          tableId,
+          items: stampedItems,
+          status: 'pending',
+          subtotal,
+          discount: 0,
+          total: subtotal,
+          customerName: opts?.customerName,
+          waiterId: opts?.waiterId,
+          source: opts?.source ?? 'qr',
+        })
+      },
+
+      closeTableBill: (tableId, paymentMethod) => {
+        const state = get()
+        const tableOrders = state.orders.filter(o =>
+          o.tableId === tableId &&
+          o.type === 'dine-in' &&
+          o.status !== 'delivered' &&
+          o.status !== 'canceled'
+        )
+        if (tableOrders.length === 0) return
+        const now = new Date().toISOString()
+        set(s => ({
+          orders: s.orders.map(o => tableOrders.find(t => t.id === o.id)
+            ? { ...o, status: 'delivered' as const, paymentMethod, updatedAt: now }
+            : o
+          ),
+          tables: s.tables.map(t => t.id === tableId
+            ? { ...t, status: 'cleaning' as const, currentOrderId: undefined }
+            : t
+          ),
+          transactions: [
+            ...tableOrders
+              .filter(o => !s.transactions.find(tx => tx.relatedOrderId === o.id))
+              .map(o => ({
+                id: uid(),
+                type: 'income' as const,
+                category: 'Vendas Salão',
+                description: `Pedido #${o.number} (Mesa)`,
+                amount: o.total,
+                paymentMethod,
+                date: now,
+                relatedOrderId: o.id,
+              })),
+            ...s.transactions,
+          ],
+        }))
+      },
 
       updateTable: (id, updates) => set(s => ({
         tables: s.tables.map(t => t.id === id ? { ...t, ...updates } : t)

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import AppShell from '@/components/AppShell'
 import { useStore } from '@/lib/store'
-import { QrCode, Smartphone, Tablet, Monitor, Copy, ExternalLink, Check } from 'lucide-react'
+import { QrCode, Smartphone, Tablet, Monitor, Copy, ExternalLink, Check, Printer, Utensils } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function CardapioPage() {
@@ -103,6 +103,40 @@ export default function CardapioPage() {
                 <li>• Abre o cardápio completo, sem precisar de app</li>
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* QR Codes por mesa */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-bold flex items-center gap-2"><Utensils className="w-4 h-4 text-teal-600" /> QR Codes por mesa</h3>
+              <p className="text-xs text-gray-500">Cada mesa abre o cardápio já identificada — comanda automática</p>
+            </div>
+            <button onClick={() => window.print()} className="btn-secondary flex items-center gap-1 text-xs">
+              <Printer className="w-3 h-3" /> Imprimir todos
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {store.tables.map(t => {
+              const url = typeof window !== 'undefined'
+                ? `${window.location.origin}/cardapio/public?mesa=${t.number}`
+                : `/cardapio/public?mesa=${t.number}`
+              const qr = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&color=0B7B8C`
+              return (
+                <div key={t.id} className="border-2 border-gray-200 rounded-xl p-3 text-center">
+                  <p className="text-xs uppercase font-bold text-teal-700 mb-1">Mesa {t.number}</p>
+                  <img src={qr} alt={`QR Mesa ${t.number}`} className="w-full aspect-square" />
+                  <a
+                    href={url}
+                    target="_blank"
+                    className="text-[10px] text-gray-500 hover:text-teal-600 flex items-center justify-center gap-1 mt-1"
+                  >
+                    abrir <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </div>
+              )
+            })}
           </div>
         </div>
 

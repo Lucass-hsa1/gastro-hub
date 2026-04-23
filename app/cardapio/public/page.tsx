@@ -1,31 +1,47 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingBag, Plus, Minus, X, Search, MapPin, Phone, Clock, UtensilsCrossed, Star, Send } from 'lucide-react'
+import {
+  ShoppingBag, Plus, Minus, X, Search, Clock, UtensilsCrossed, Star, Send,
+  MapPin, ClipboardList, ChefHat, ArrowLeft
+} from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
+import Link from 'next/link'
 import type { OrderItem } from '@/lib/types'
 
 function formatBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-export default function PublicMenuPage() {
+function PublicMenuInner() {
   const [mounted, setMounted] = useState(false)
   const store = useStore()
+  const router = useRouter()
+  const params = useSearchParams()
+
+  const mesaParam = params.get('mesa')
+  const modo = params.get('modo') // 'garcom' = aberto pelo garçom dentro do app
+  const isWaiter = modo === 'garcom'
+
+  const tableObj = mesaParam ? store.tables.find(t => t.number === Number(mesaParam)) : null
+  const isDineIn = !!tableObj
+  const isDelivery = !mesaParam // sem mesa = pedido delivery/balcão
+
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [cart, setCart] = useState<OrderItem[]>([])
   const [showCart, setShowCart] = useState(false)
-  const [tableNumber, setTableNumber] = useState('')
   const [customerName, setCustomerName] = useState('')
-  const [sentOrder, setSentOrder] = useState<number | null>(null)
+  const [address, setAddress] = useState('')
+  const [phone, setPhone] = useState('')
 
   useEffect(() => setMounted(true), [])
   if (!mounted) return null
 
-  const categories = ['Todos', ...new Set(store.menu.map(m => m.category))]
+  const categories = ['Todos', ...Array.from(new Set(store.menu.map(m => m.category)))]
   const filtered = store.menu.filter(m => {
     if (!m.available) return false
     if (selectedCategory !== 'Todos' && m.category !== selectedCategory) return false
@@ -38,9 +54,17 @@ export default function PublicMenuPage() {
     if (existing) {
       setCart(cart.map(i => i.menuItemId === item.id ? { ...i, quantity: i.quantity + 1 } : i))
     } else {
-      setCart([...cart, { id: Math.random().toString(36).slice(2), menuItemId: item.id, name: item.name, quantity: 1, price: item.price, emoji: item.emoji }])
+      setCart([...cart, {
+        id: Math.random().toString(36).slice(2),
+        menuItemId: item.id,
+        name: item.name,
+        quantity: 1,
+        price: item.price,
+        emoji: item.emoji,
+        prepTime: item.prepTime,
+      }])
     }
-    toast.success(`${item.name} adicionado`, { icon: item.emoji, duration: 1000 })
+    toast.success(`${item.name}`, { icon: item.emoji, duration: 800 })
   }
 
   const updateQty = (id: string, qty: number) => {
@@ -51,45 +75,79 @@ export default function PublicMenuPage() {
   const total = cart.reduce((s, i) => s + i.price * i.quantity, 0)
 
   const sendOrder = () => {
-    if (!tableNumber) { toast.error('Informe a mesa'); return }
-    if (!customerName) { toast.error('Informe seu nome'); return }
     if (cart.length === 0) { toast.error('Carrinho vazio'); return }
 
+    if (isDineIn && tableObj) {
+      const order = store.createOrAppendTableOrder(tableObj.id, cart, {
+        source: isWaiter ? 'waiter' : 'qr',
+        customerName: customerName || undefined,
+      })
+      setCart([])
+      setShowCart(false)
+      // Vai pra status (cliente) ou volta pro garçom (modo garcom)
+      if (isWaiter) {
+        toast.success(`Pedido enviado pra cozinha (Mesa ${tableObj.number})`, { duration: 2500 })
+        setTimeout(() => router.push('/garcom'), 800)
+      } else {
+        router.push(`/cardapio/public/pedido/${order.id}?mesa=${tableObj.number}`)
+      }
+      return
+    }
+
+    // Delivery/Takeout
+    if (!customerName) { toast.error('Informe seu nome'); return }
+    if (!address) { toast.error('Informe o endereço'); return }
+    if (!phone) { toast.error('Informe o telefone'); return }
+
     const order = store.createOrder({
-      type: 'dine-in',
-      items: cart,
+      type: 'delivery',
+      items: cart.map(i => ({ ...i, status: 'pending', addedAt: new Date().toISOString() })),
       status: 'pending',
       subtotal: total,
       discount: 0,
-      total,
+      total: total + store.restaurant.deliveryFee,
       customerName,
-      notes: `Mesa ${tableNumber} - Pedido via QR Code`,
+      source: 'qr',
+      notes: `Endereço: ${address} • Tel: ${phone}`,
     })
-
-    setSentOrder(order.number)
+    store.createDelivery({
+      orderId: order.id,
+      customerName,
+      address,
+      neighborhood: '',
+      phone,
+      status: 'pending',
+      total: total + store.restaurant.deliveryFee,
+      deliveryFee: store.restaurant.deliveryFee,
+      estimatedTime: 35,
+      distance: 3,
+    })
     setCart([])
     setShowCart(false)
-
-    setTimeout(() => setSentOrder(null), 8000)
+    router.push(`/cardapio/public/pedido/${order.id}`)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-orange-50">
       <Toaster position="top-center" />
 
-      {/* Hero */}
       <div className="bg-gradient-to-r from-teal-600 via-teal-500 to-orange-500 text-white sticky top-0 z-30">
         <div className="max-w-2xl mx-auto p-4">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                  <UtensilsCrossed className="w-6 h-6 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-xs opacity-80">Cardápio Digital</p>
-                  <h1 className="text-lg font-bold">{store.restaurant.name}</h1>
-                </div>
+            <div className="flex items-center gap-2">
+              {isWaiter && (
+                <button onClick={() => router.push('/garcom')} className="p-2 bg-white/20 rounded-lg">
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              )}
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+                <UtensilsCrossed className="w-6 h-6 text-orange-500" />
+              </div>
+              <div>
+                <p className="text-xs opacity-80">
+                  {isWaiter ? '👤 Modo Garçom' : isDineIn ? '🪑 Pedindo na Mesa' : '🛵 Delivery'}
+                </p>
+                <h1 className="text-lg font-bold">{store.restaurant.name}</h1>
               </div>
             </div>
             <button
@@ -106,7 +164,6 @@ export default function PublicMenuPage() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="max-w-2xl mx-auto px-4 pb-4">
           <div className="bg-white rounded-xl flex items-center gap-2 px-3 py-2">
             <Search className="w-4 h-4 text-gray-400" />
@@ -119,7 +176,6 @@ export default function PublicMenuPage() {
           </div>
         </div>
 
-        {/* Categories */}
         <div className="max-w-2xl mx-auto px-4 pb-3">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {categories.map(cat => (
@@ -137,26 +193,35 @@ export default function PublicMenuPage() {
         </div>
       </div>
 
-      {/* Restaurant info */}
+      {/* Banner identificando mesa ou delivery */}
       <div className="max-w-2xl mx-auto p-4">
-        <div className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
-          <div className="flex items-center gap-2 text-xs">
-            <Clock className="w-4 h-4 text-teal-600" />
-            <span className="font-semibold">Aberto</span>
-            <span className="text-gray-500">• {store.restaurant.openTime} - {store.restaurant.closeTime}</span>
+        {isDineIn && tableObj ? (
+          <div className="bg-gradient-to-r from-teal-100 to-orange-100 border border-teal-300 rounded-xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-3xl">🪑</div>
+              <div>
+                <p className="text-xs uppercase font-bold text-teal-700">Mesa identificada</p>
+                <p className="text-lg font-bold">Mesa {tableObj.number} <span className="text-xs font-normal text-gray-600">• {tableObj.capacity} lugares</span></p>
+              </div>
+            </div>
+            <Link
+              href={`/cardapio/public/comanda?mesa=${tableObj.number}`}
+              className="bg-white text-teal-700 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1 border border-teal-200"
+            >
+              <ClipboardList className="w-3 h-3" /> Comanda
+            </Link>
           </div>
-          <div className="flex items-center gap-1 text-yellow-500 ml-auto">
-            <Star className="w-4 h-4 fill-yellow-500" />
-            <Star className="w-4 h-4 fill-yellow-500" />
-            <Star className="w-4 h-4 fill-yellow-500" />
-            <Star className="w-4 h-4 fill-yellow-500" />
-            <Star className="w-4 h-4 fill-yellow-500" />
-            <span className="text-xs text-gray-600 ml-1 font-semibold">4.9</span>
+        ) : isDelivery && !isWaiter ? (
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
+            <div className="text-3xl">🛵</div>
+            <div>
+              <p className="text-xs uppercase font-bold text-orange-700">Pedido para entrega</p>
+              <p className="text-sm text-gray-700">Taxa: {formatBRL(store.restaurant.deliveryFee)} • Entrega ~35 min</p>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
-      {/* Menu */}
       <div className="max-w-2xl mx-auto px-4 pb-32 space-y-6">
         {categories.filter(c => c !== 'Todos' && (selectedCategory === 'Todos' || c === selectedCategory)).map(cat => {
           const items = filtered.filter(f => f.category === cat)
@@ -186,7 +251,12 @@ export default function PublicMenuPage() {
                       <p className="font-bold text-gray-900">{item.name}</p>
                       <p className="text-xs text-gray-500 line-clamp-2 mt-1">{item.description}</p>
                       <div className="flex items-center justify-between mt-2">
-                        <p className="text-lg font-bold text-teal-600">{formatBRL(item.price)}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-lg font-bold text-teal-600">{formatBRL(item.price)}</p>
+                          <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
+                            <Clock className="w-3 h-3" /> {item.prepTime}min
+                          </span>
+                        </div>
                         <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-orange-500 rounded-full flex items-center justify-center text-white">
                           <Plus className="w-4 h-4" />
                         </div>
@@ -200,7 +270,6 @@ export default function PublicMenuPage() {
         })}
       </div>
 
-      {/* Floating cart button */}
       {cart.length > 0 && !showCart && (
         <motion.button
           initial={{ y: 100 }}
@@ -213,11 +282,10 @@ export default function PublicMenuPage() {
             <span className="font-bold">{cart.reduce((s, i) => s + i.quantity, 0)} itens</span>
           </div>
           <span className="font-bold text-lg">{formatBRL(total)}</span>
-          <span className="text-sm opacity-80">Ver carrinho →</span>
+          <span className="text-sm opacity-80">Ver →</span>
         </motion.button>
       )}
 
-      {/* Cart modal */}
       <AnimatePresence>
         {showCart && (
           <motion.div
@@ -235,7 +303,15 @@ export default function PublicMenuPage() {
               className="bg-white rounded-t-3xl w-full max-w-2xl max-h-[90vh] flex flex-col"
             >
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-lg font-bold">Seu Pedido</h2>
+                <div>
+                  <h2 className="text-lg font-bold">Seu Pedido</h2>
+                  {isDineIn && tableObj && (
+                    <p className="text-xs text-teal-600 font-semibold">Mesa {tableObj.number}</p>
+                  )}
+                  {isDelivery && (
+                    <p className="text-xs text-orange-600 font-semibold">Delivery</p>
+                  )}
+                </div>
                 <button onClick={() => setShowCart(false)}><X className="w-5 h-5" /></button>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -265,34 +341,66 @@ export default function PublicMenuPage() {
                       </div>
                     ))}
                     <div className="pt-4 space-y-2">
-                      <input
-                        placeholder="Número da mesa"
-                        value={tableNumber}
-                        onChange={e => setTableNumber(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-teal-500"
-                      />
-                      <input
-                        placeholder="Seu nome"
-                        value={customerName}
-                        onChange={e => setCustomerName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-teal-500"
-                      />
+                      {isDineIn ? (
+                        <input
+                          placeholder="Seu nome (opcional)"
+                          value={customerName}
+                          onChange={e => setCustomerName(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-teal-500"
+                        />
+                      ) : (
+                        <>
+                          <input
+                            placeholder="Seu nome *"
+                            value={customerName}
+                            onChange={e => setCustomerName(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-teal-500"
+                          />
+                          <input
+                            placeholder="Telefone *"
+                            value={phone}
+                            onChange={e => setPhone(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-teal-500"
+                          />
+                          <div className="relative">
+                            <MapPin className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                            <input
+                              placeholder="Endereço completo *"
+                              value={address}
+                              onChange={e => setAddress(e.target.value)}
+                              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-teal-500"
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </>
                 )}
               </div>
               {cart.length > 0 && (
                 <div className="p-4 border-t border-gray-100 space-y-3">
+                  {isDelivery && (
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>Taxa de entrega</span>
+                      <span>{formatBRL(store.restaurant.deliveryFee)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg">
                     <span className="font-bold">Total</span>
-                    <span className="font-bold text-teal-700">{formatBRL(total)}</span>
+                    <span className="font-bold text-teal-700">
+                      {formatBRL(isDelivery ? total + store.restaurant.deliveryFee : total)}
+                    </span>
                   </div>
                   <button
                     onClick={sendOrder}
                     className="w-full py-3 bg-gradient-to-r from-teal-600 to-orange-500 text-white rounded-xl font-bold hover:shadow-lg flex items-center justify-center gap-2"
                   >
-                    <Send className="w-5 h-5" />
-                    Enviar Pedido
+                    {isDineIn ? <ChefHat className="w-5 h-5" /> : <Send className="w-5 h-5" />}
+                    {isWaiter
+                      ? `Enviar pra Cozinha • Mesa ${tableObj?.number}`
+                      : isDineIn
+                        ? `Mandar pra Cozinha • Mesa ${tableObj?.number}`
+                        : 'Finalizar Pedido'}
                   </button>
                 </div>
               )}
@@ -300,27 +408,14 @@ export default function PublicMenuPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Success popup */}
-      <AnimatePresence>
-        {sentOrder && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
-          >
-            <div className="bg-white rounded-3xl p-8 text-center max-w-sm shadow-2xl">
-              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <Send className="w-10 h-10 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Pedido Enviado!</h2>
-              <p className="text-gray-600 mb-4">Pedido #{sentOrder} foi recebido pela cozinha</p>
-              <p className="text-sm text-gray-500">Aguarde ser chamado, obrigado! 🍽️</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
+  )
+}
+
+export default function PublicMenuPage() {
+  return (
+    <Suspense fallback={null}>
+      <PublicMenuInner />
+    </Suspense>
   )
 }
