@@ -208,6 +208,38 @@ export interface Restaurant {
 
 export type UserRole = 'cliente' | 'garcom' | 'cozinha' | 'gerente' | 'super-admin' | 'entregador'
 
+export type FiscalStatus = 'autorizada' | 'cancelada' | 'rejeitada' | 'contingencia'
+export type FiscalDocType = 'NFCe' | 'SAT' | 'NFE'
+
+export interface FiscalReceipt {
+  id: string
+  /** Número sequencial do documento */
+  number: number
+  /** Série fiscal (geralmente 1) */
+  series: number
+  /** Tipo do documento fiscal eletrônico */
+  docType: FiscalDocType
+  /** Chave de acesso (44 dígitos) */
+  accessKey: string
+  /** Número de protocolo SEFAZ */
+  protocol: string
+  status: FiscalStatus
+  orderId?: string
+  orderNumber?: number
+  customerName?: string
+  customerDoc?: string // CPF/CNPJ se informado
+  items: { name: string; quantity: number; price: number; total: number; ncm?: string; cfop?: string }[]
+  subtotal: number
+  discount: number
+  total: number
+  /** Tributos aproximados (Lei 12.741/12) */
+  taxApprox: number
+  paymentMethod: PaymentMethod
+  issuedAt: string
+  canceledAt?: string
+  cancelReason?: string
+}
+
 export interface AuthUser {
   name: string
   email: string

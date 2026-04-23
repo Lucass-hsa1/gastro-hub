@@ -4,9 +4,10 @@ import { useState, useEffect, useMemo } from 'react'
 import AppShell from '@/components/AppShell'
 import { useStore } from '@/lib/store'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Plus, Minus, X, CreditCard, Banknote, QrCode, Receipt, Search, Tag, User, MapPin, Check, Utensils, Store as StoreIcon, Truck, Package as PackageIcon } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, X, CreditCard, Banknote, QrCode, Receipt, Search, Tag, User, MapPin, Check, Utensils, Store as StoreIcon, Truck, Package as PackageIcon, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
-import type { OrderItem, OrderType, PaymentMethod } from '@/lib/types'
+import FiscalReceiptModal from '@/components/FiscalReceiptModal'
+import type { OrderItem, OrderType, PaymentMethod, FiscalReceipt } from '@/lib/types'
 
 function formatBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -27,6 +28,8 @@ export default function PDVPage() {
   const [promoCode, setPromoCode] = useState('')
   const [showPayment, setShowPayment] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix')
+  const [issueFiscal, setIssueFiscal] = useState(true)
+  const [showReceipt, setShowReceipt] = useState<FiscalReceipt | null>(null)
 
   useEffect(() => setMounted(true), [])
   if (!mounted) return <AppShell title="PDV"><div /></AppShell>
@@ -122,7 +125,23 @@ export default function PDVPage() {
       })
     }
 
-    toast.success(`Pedido #${order.number} criado!`, { icon: '🎉', duration: 3000 })
+    // Emite NFC-e quando venda é finalizada (counter ou se usuário marcou)
+    if (issueFiscal && (orderType === 'counter' || orderType === 'delivery')) {
+      const receipt = store.issueFiscalReceipt({
+        orderId: order.id,
+        orderNumber: order.number,
+        customerName: customerName || undefined,
+        items: cart.map(i => ({ name: i.name, quantity: i.quantity, price: i.price, total: i.price * i.quantity })),
+        subtotal,
+        discount,
+        total,
+        paymentMethod,
+      })
+      setShowReceipt(receipt)
+      toast.success(`Pedido #${order.number} + NFC-e #${receipt.number}`, { icon: '🧾', duration: 3000 })
+    } else {
+      toast.success(`Pedido #${order.number} criado!`, { icon: '🎉', duration: 3000 })
+    }
 
     // Reset
     setCart([])
@@ -380,10 +399,26 @@ export default function PDVPage() {
                 <PaymentBtn active={paymentMethod === 'debit'} onClick={() => setPaymentMethod('debit')} icon={<CreditCard />} label="Débito" />
                 <PaymentBtn active={paymentMethod === 'cash'} onClick={() => setPaymentMethod('cash')} icon={<Banknote />} label="Dinheiro" />
               </div>
-              <div className="bg-gradient-to-r from-teal-600 to-orange-500 rounded-xl p-4 text-white mb-6">
+              <div className="bg-gradient-to-r from-teal-600 to-orange-500 rounded-xl p-4 text-white mb-4">
                 <p className="text-xs opacity-80">Total a pagar</p>
                 <p className="text-3xl font-bold">{formatBRL(total)}</p>
               </div>
+
+              {/* NFC-e */}
+              <label className="flex items-center gap-3 p-3 bg-teal-50 border border-teal-200 rounded-xl mb-4 cursor-pointer hover:bg-teal-100 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={issueFiscal}
+                  onChange={e => setIssueFiscal(e.target.checked)}
+                  className="w-4 h-4 accent-teal-600"
+                />
+                <FileText className="w-4 h-4 text-teal-700" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-teal-800">Emitir cupom fiscal (NFC-e)</p>
+                  <p className="text-[10px] text-teal-700">Será gerado automaticamente após confirmar</p>
+                </div>
+              </label>
+
               <button
                 onClick={finalizeSale}
                 className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold hover:shadow-lg transition-shadow flex items-center justify-center gap-2"
@@ -393,6 +428,16 @@ export default function PDVPage() {
               </button>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cupom Fiscal Modal */}
+      <AnimatePresence>
+        {showReceipt && (
+          <FiscalReceiptModal
+            receipt={showReceipt}
+            onClose={() => setShowReceipt(null)}
+          />
         )}
       </AnimatePresence>
     </AppShell>

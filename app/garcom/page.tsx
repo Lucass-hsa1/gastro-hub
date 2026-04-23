@@ -6,12 +6,13 @@ import { useStore } from '@/lib/store'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Bell, ChefHat, CheckCircle2, Clock, Utensils, ClipboardList, Plus,
-  CreditCard, X, Receipt, Hash, Users, ShoppingBag
+  CreditCard, X, Receipt, Hash, Users, ShoppingBag, FileText
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import clsx from 'clsx'
-import type { Order, PaymentMethod } from '@/lib/types'
+import FiscalReceiptModal from '@/components/FiscalReceiptModal'
+import type { Order, PaymentMethod, FiscalReceipt } from '@/lib/types'
 
 function formatBRL(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -36,6 +37,8 @@ export default function GarcomPage() {
   const store = useStore()
   const [openTableId, setOpenTableId] = useState<string | null>(null)
   const [closingTableId, setClosingTableId] = useState<string | null>(null)
+  const [issueFiscal, setIssueFiscal] = useState(true)
+  const [showReceipt, setShowReceipt] = useState<FiscalReceipt | null>(null)
   const [, force] = useState(0)
 
   useEffect(() => {
@@ -97,8 +100,32 @@ export default function GarcomPage() {
 
   const closeBill = (paymentMethod: PaymentMethod) => {
     if (!closingTable) return
+    const ordersToClose = closingOrders.slice() // snapshot antes do close
+    const closingTableNum = closingTable.number
     store.closeTableBill(closingTable.id, paymentMethod)
-    toast.success(`Conta fechada • Mesa ${closingTable.number} • ${paymentMethods.find(p => p.key === paymentMethod)?.label}`)
+
+    if (issueFiscal && ordersToClose.length > 0) {
+      // Cupom único agregando todos os pedidos da mesa
+      const allItems = ordersToClose.flatMap(o => o.items.map(i => ({
+        name: i.name, quantity: i.quantity, price: i.price, total: i.price * i.quantity
+      })))
+      const subtotal = ordersToClose.reduce((s, o) => s + o.subtotal, 0)
+      const discount = ordersToClose.reduce((s, o) => s + o.discount, 0)
+      const total = ordersToClose.reduce((s, o) => s + o.total, 0)
+      const numbers = ordersToClose.map(o => `#${o.number}`).join(', ')
+      const receipt = store.issueFiscalReceipt({
+        orderId: ordersToClose[0].id,
+        orderNumber: ordersToClose[0].number,
+        customerName: ordersToClose.find(o => o.customerName)?.customerName,
+        items: allItems,
+        subtotal, discount, total,
+        paymentMethod,
+      })
+      setShowReceipt(receipt)
+      toast.success(`Mesa ${closingTableNum} fechada · NFC-e #${receipt.number} (${numbers})`, { icon: '🧾', duration: 3500 })
+    } else {
+      toast.success(`Conta fechada • Mesa ${closingTableNum} • ${paymentMethods.find(p => p.key === paymentMethod)?.label}`)
+    }
     setClosingTableId(null)
     setOpenTableId(null)
   }
@@ -376,6 +403,21 @@ export default function GarcomPage() {
                 <p className="text-3xl font-bold text-teal-700">{formatBRL(closingTotal)}</p>
                 <p className="text-xs text-gray-500 mt-1">{closingOrders.length} pedido(s) · {closingOrders.reduce((s, o) => s + o.items.reduce((q, i) => q + i.quantity, 0), 0)} itens</p>
               </div>
+
+              <label className="flex items-center gap-3 p-3 bg-teal-50 border border-teal-200 rounded-xl mb-4 cursor-pointer hover:bg-teal-100 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={issueFiscal}
+                  onChange={e => setIssueFiscal(e.target.checked)}
+                  className="w-4 h-4 accent-teal-600"
+                />
+                <FileText className="w-4 h-4 text-teal-700" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-teal-800">Emitir NFC-e</p>
+                  <p className="text-[10px] text-teal-700">Cupom fiscal eletrônico ao confirmar pagamento</p>
+                </div>
+              </label>
+
               <p className="text-sm font-bold mb-2">Forma de pagamento</p>
               <div className="grid grid-cols-2 gap-2">
                 {paymentMethods.map(pm => (
@@ -391,6 +433,16 @@ export default function GarcomPage() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cupom fiscal emitido */}
+      <AnimatePresence>
+        {showReceipt && (
+          <FiscalReceiptModal
+            receipt={showReceipt}
+            onClose={() => setShowReceipt(null)}
+          />
         )}
       </AnimatePresence>
     </AppShell>

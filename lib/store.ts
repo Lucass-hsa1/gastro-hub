@@ -5,7 +5,8 @@ import { persist } from 'zustand/middleware'
 import type {
   MenuItem, Order, Table, Delivery, Driver, InventoryItem,
   Recipe, Customer, Employee, Transaction, Promotion, Restaurant,
-  OrderStatus, OrderItem, OrderType, PaymentMethod, AuthUser, UserRole
+  OrderStatus, OrderItem, OrderType, PaymentMethod, AuthUser, UserRole,
+  FiscalReceipt
 } from './types'
 
 // ===== DEFAULT DATA =====
@@ -301,10 +302,26 @@ interface StoreState {
   restaurant: Restaurant
   nextOrderNumber: number
   authUser: AuthUser | null
+  fiscalReceipts: FiscalReceipt[]
+  nextFiscalNumber: number
 
   // Auth
   login: (user: AuthUser) => void
   logout: () => void
+
+  // Fiscal
+  issueFiscalReceipt: (data: {
+    orderId?: string
+    orderNumber?: number
+    customerName?: string
+    customerDoc?: string
+    items: { name: string; quantity: number; price: number; total: number }[]
+    subtotal: number
+    discount: number
+    total: number
+    paymentMethod: PaymentMethod
+  }) => FiscalReceipt
+  cancelFiscalReceipt: (id: string, reason: string) => void
 
   // Menu Actions
   addMenuItem: (item: Omit<MenuItem, 'id'>) => void
@@ -390,9 +407,62 @@ export const useStore = create<StoreState>()(
       restaurant: defaultRestaurant,
       nextOrderNumber: 1005,
       authUser: null,
+      fiscalReceipts: [],
+      nextFiscalNumber: 100001,
 
       login: (user) => set({ authUser: user }),
       logout: () => set({ authUser: null }),
+
+      issueFiscalReceipt: (data) => {
+        const number = get().nextFiscalNumber
+        const now = new Date()
+        // Chave de acesso fake (44 dígitos, formato NFC-e)
+        const yymm = now.toISOString().slice(2, 7).replace('-', '')
+        const cnpjDigits = (get().restaurant.cnpj || '12345678000190').replace(/\D/g, '').padStart(14, '0')
+        const random = Math.floor(Math.random() * 1e9).toString().padStart(9, '0')
+        const accessKey = (
+          '35' + yymm + cnpjDigits + '65' + '001' +
+          number.toString().padStart(9, '0') + '1' + random.slice(0, 8) + Math.floor(Math.random() * 10)
+        ).slice(0, 44).padEnd(44, '0')
+        const protocol = '135' + Math.floor(Math.random() * 1e15).toString().padStart(15, '0')
+        // Tributos aprox. (Lei 12.741/12) ~13.45% (simplificado)
+        const taxApprox = Math.round(data.total * 0.1345 * 100) / 100
+
+        const receipt: FiscalReceipt = {
+          id: uid(),
+          number,
+          series: 1,
+          docType: 'NFCe',
+          accessKey,
+          protocol,
+          status: 'autorizada',
+          orderId: data.orderId,
+          orderNumber: data.orderNumber,
+          customerName: data.customerName,
+          customerDoc: data.customerDoc,
+          items: data.items.map(i => ({ ...i, ncm: '21069090', cfop: '5102' })),
+          subtotal: data.subtotal,
+          discount: data.discount,
+          total: data.total,
+          taxApprox,
+          paymentMethod: data.paymentMethod,
+          issuedAt: now.toISOString(),
+        }
+        set(s => ({
+          fiscalReceipts: [receipt, ...s.fiscalReceipts],
+          nextFiscalNumber: s.nextFiscalNumber + 1,
+        }))
+        return receipt
+      },
+
+      cancelFiscalReceipt: (id, reason) => {
+        set(s => ({
+          fiscalReceipts: s.fiscalReceipts.map(f => f.id === id
+            ? { ...f, status: 'cancelada' as const, canceledAt: new Date().toISOString(), cancelReason: reason }
+            : f
+          )
+        }))
+      },
 
       addMenuItem: (item) => set(s => ({ menu: [...s.menu, { ...item, id: uid() }] })),
       updateMenuItem: (id, updates) => set(s => ({ menu: s.menu.map(m => m.id === id ? { ...m, ...updates } : m) })),
@@ -639,11 +709,21 @@ export const useStore = create<StoreState>()(
         promotions: defaultPromotions,
         restaurant: defaultRestaurant,
         nextOrderNumber: 1005,
+        fiscalReceipts: [],
+        nextFiscalNumber: 100001,
       }),
     }),
     {
       name: 'gastrohub-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted: any, version) => {
+        if (!persisted) return persisted
+        if (version < 2) {
+          persisted.fiscalReceipts = persisted.fiscalReceipts ?? []
+          persisted.nextFiscalNumber = persisted.nextFiscalNumber ?? 100001
+        }
+        return persisted
+      },
     }
   )
 )

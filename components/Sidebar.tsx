@@ -9,7 +9,7 @@ import {
   LayoutDashboard, ShoppingCart, UtensilsCrossed, Truck, Users,
   DollarSign, Package, BookOpen, Contact, BarChart3, Briefcase,
   Tag, Settings, ChevronLeft, Menu, QrCode, Bike, Soup, Store,
-  ChefHat, ConciergeBell, LogOut, ShieldCheck, Smartphone
+  ChefHat, ConciergeBell, LogOut, ShieldCheck, Smartphone, FileText
 } from 'lucide-react'
 import BrandLogo from './BrandLogo'
 import { useStore } from '@/lib/store'
@@ -37,6 +37,7 @@ const menuItems: MenuItem[] = [
   { href: '/delivery', icon: Truck, label: 'Entregas', group: 'Operação', roles: ['gerente'] },
   { href: '/entregadores', icon: Bike, label: 'Entregadores', group: 'Operação', roles: ['gerente'] },
   { href: '/financeiro', icon: DollarSign, label: 'Financeiro', group: 'Gestão', roles: ['gerente', 'super-admin'] },
+  { href: '/fiscal', icon: FileText, label: 'Cupons Fiscais', group: 'Gestão', badge: 'NEW', roles: ['gerente', 'super-admin'] },
   { href: '/estoque', icon: Package, label: 'Estoque', group: 'Gestão', roles: ['gerente'] },
   { href: '/clientes', icon: Contact, label: 'Clientes (CRM)', group: 'Gestão', roles: ['gerente'] },
   { href: '/funcionarios', icon: Users, label: 'Funcionários', group: 'Gestão', roles: ['gerente', 'super-admin'] },
