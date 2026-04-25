@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import {
   ArrowRight, ChefHat, ConciergeBell, ShieldCheck, ShoppingBag, Store,
   QrCode, Smartphone, Truck, ClipboardList, Sparkles, Zap, BarChart3,
-  Users, CheckCircle2, Star, Bike
+  Users, CheckCircle2, Star, Bike, UtensilsCrossed
 } from 'lucide-react'
 import BrandLogo from '@/components/BrandLogo'
 import { useStore } from '@/lib/store'
@@ -15,11 +15,19 @@ import { useStore } from '@/lib/store'
 const profiles = [
   {
     role: 'cliente',
-    title: 'Cliente',
+    title: 'Cliente (Salão)',
     desc: 'Peça pelo QR Code da mesa, acompanhe seu pedido e veja sua comanda em tempo real.',
     icon: Smartphone,
     color: 'from-orange-400 to-orange-600',
     href: '/login?role=cliente',
+  },
+  {
+    role: 'cliente-delivery',
+    title: 'Cliente (Delivery)',
+    desc: 'Marketplace estilo iFood — escolha entre vários restaurantes, pague e acompanhe a entrega.',
+    icon: UtensilsCrossed,
+    color: 'from-rose-500 to-orange-500',
+    href: '/login?role=cliente-delivery',
   },
   {
     role: 'garcom',
@@ -91,6 +99,7 @@ export default function Landing() {
               <Link
                 href={
                   authUser.role === 'cliente' ? '/cliente' :
+                  authUser.role === 'cliente-delivery' ? '/delivery-app' :
                   authUser.role === 'garcom' ? '/garcom' :
                   authUser.role === 'cozinha' ? '/cozinha' :
                   authUser.role === 'entregador' ? '/entregador' :
@@ -162,7 +171,7 @@ export default function Landing() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold mb-2">6 perfis, 1 plataforma</h2>
+            <h2 className="text-3xl font-extrabold mb-2">7 perfis, 1 plataforma</h2>
             <p className="text-gray-600">Escolha por onde quer entrar — todos com login pré-preenchido</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -223,8 +232,8 @@ export default function Landing() {
       {/* Stats */}
       <section className="py-12 bg-gradient-to-r from-teal-600 to-orange-500 text-white">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div><p className="text-4xl font-extrabold">15</p><p className="text-sm opacity-80">Telas</p></div>
-          <div><p className="text-4xl font-extrabold">6</p><p className="text-sm opacity-80">Perfis</p></div>
+          <div><p className="text-4xl font-extrabold">19</p><p className="text-sm opacity-80">Telas</p></div>
+          <div><p className="text-4xl font-extrabold">7</p><p className="text-sm opacity-80">Perfis</p></div>
           <div><p className="text-4xl font-extrabold">100%</p><p className="text-sm opacity-80">Funcional</p></div>
           <div><p className="text-4xl font-extrabold">0</p><p className="text-sm opacity-80">Backend (demo)</p></div>
         </div>

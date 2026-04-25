@@ -206,7 +206,7 @@ export interface Restaurant {
   maxDeliveryDistance: number
 }
 
-export type UserRole = 'cliente' | 'garcom' | 'cozinha' | 'gerente' | 'super-admin' | 'entregador'
+export type UserRole = 'cliente' | 'cliente-delivery' | 'garcom' | 'cozinha' | 'gerente' | 'super-admin' | 'entregador'
 
 export type FiscalStatus = 'autorizada' | 'cancelada' | 'rejeitada' | 'contingencia'
 export type FiscalDocType = 'NFCe' | 'SAT' | 'NFE'

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
   ArrowRight, ArrowLeft, ChefHat, ConciergeBell, ShieldCheck,
-  Smartphone, BarChart3, User, Lock, Mail, Sparkles, Bike
+  Smartphone, BarChart3, User, Lock, Mail, Sparkles, Bike, UtensilsCrossed
 } from 'lucide-react'
 import BrandLogo from '@/components/BrandLogo'
 import { useStore } from '@/lib/store'
@@ -17,10 +17,19 @@ const DEMOS: Record<UserRole, { email: string; password: string; name: string; s
     email: 'joao@email.com',
     password: 'gastro',
     name: 'João Silva',
-    subtitle: 'Cliente final · pede pelo QR, vê comanda, histórico, fidelidade',
+    subtitle: 'Cliente salão · pede pelo QR, vê comanda, histórico, fidelidade',
     icon: Smartphone,
     color: 'from-orange-400 to-orange-600',
     home: '/cliente',
+  },
+  'cliente-delivery': {
+    email: 'mariana@email.com',
+    password: 'gastro',
+    name: 'Mariana Costa',
+    subtitle: 'Cliente delivery · marketplace estilo iFood com vários restaurantes',
+    icon: UtensilsCrossed,
+    color: 'from-rose-500 to-orange-500',
+    home: '/delivery-app',
   },
   garcom: {
     email: 'patricia@gastrohub.com',
@@ -70,7 +79,8 @@ const DEMOS: Record<UserRole, { email: string; password: string; name: string; s
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
-  cliente: 'Cliente',
+  cliente: 'Cliente Salão',
+  'cliente-delivery': 'Cliente Delivery',
   garcom: 'Garçom',
   cozinha: 'Cozinha',
   entregador: 'Entregador',
@@ -106,7 +116,7 @@ function LoginInner() {
       email: email || d.email,
       role,
       loggedAt: new Date().toISOString(),
-      customerId: role === 'cliente' ? 'c1' : undefined,
+      customerId: role === 'cliente' ? 'c1' : role === 'cliente-delivery' ? 'c2' : undefined,
       employeeId: role === 'garcom' ? 'e2' : role === 'cozinha' ? 'e3' : role === 'gerente' ? 'e1' : undefined,
       driverId: role === 'entregador' ? 'd1' : undefined,
     })
@@ -131,7 +141,7 @@ function LoginInner() {
             <Sparkles className="w-3 h-3 text-yellow-300" /> DEMO
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold mb-3 leading-tight">
-            5 perfis, 1 plataforma.
+            7 perfis, 1 plataforma.
           </h1>
           <p className="text-white/80 text-sm mb-6">
             Use as credenciais já preenchidas — só clicar em entrar.

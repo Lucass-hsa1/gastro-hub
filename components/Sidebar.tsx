@@ -50,7 +50,8 @@ const menuItems: MenuItem[] = [
 const groups = ['Principal', 'Operação', 'Gestão', 'Marketing', 'Análise', 'Sistema']
 
 const roleLabels: Record<UserRole, string> = {
-  cliente: 'Cliente',
+  cliente: 'Cliente Salão',
+  'cliente-delivery': 'Cliente Delivery',
   garcom: 'Garçom',
   cozinha: 'Cozinha',
   entregador: 'Entregador',
@@ -72,6 +73,7 @@ export default function Sidebar() {
     pathname === '/login' ||
     pathname.startsWith('/cardapio/public') ||
     pathname.startsWith('/cliente') ||
+    pathname.startsWith('/delivery-app') ||
     pathname.startsWith('/super-admin') ||
     pathname.startsWith('/entregador')
   ) return null
