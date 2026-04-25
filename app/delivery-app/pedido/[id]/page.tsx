@@ -88,15 +88,15 @@ export default function OrderTrackingPage() {
   const isDelivered = order.status === 'delivered'
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      <header className="sticky top-0 z-30 bg-white shadow-sm">
+    <div className="min-h-screen mesh-warm noise pb-12">
+      <header className="sticky top-0 z-30 bg-[#FFF7EE]/90 backdrop-blur-xl border-b border-orange-100/50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <button onClick={() => router.push('/delivery-app')} className="w-9 h-9 hover:bg-gray-100 rounded-full flex items-center justify-center">
+          <button onClick={() => router.push('/delivery-app')} className="w-10 h-10 bg-white hover:bg-orange-50 rounded-2xl flex items-center justify-center shadow-sm ring-1 ring-orange-100">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1">
-            <h1 className="font-extrabold">Pedido #{order.number}</h1>
-            <p className="text-xs text-gray-500">{order.restaurantName}</p>
+            <p className="text-[10px] uppercase font-extrabold text-orange-600 tracking-wider">Pedido #{order.number}</p>
+            <h1 className="font-display text-xl">{order.restaurantName}</h1>
           </div>
         </div>
       </header>
@@ -106,18 +106,20 @@ export default function OrderTrackingPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`rounded-2xl p-5 text-white shadow-lg ${
+          className={`relative overflow-hidden rounded-3xl p-5 text-white shadow-xl ${
             isDelivered
-              ? 'bg-gradient-to-br from-emerald-500 to-green-600'
-              : 'bg-gradient-to-br from-teal-600 to-orange-500'
+              ? 'bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600'
+              : 'bg-gradient-to-br from-teal-600 via-orange-500 to-pink-500'
           }`}
         >
-          <div className="flex items-start gap-4">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-12 left-1/3 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+          <div className="relative flex items-start gap-4">
             <motion.div
               key={order.status}
               initial={{ scale: 0.6, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
-              className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+              className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 ring-1 ring-white/30"
             >
               {(() => {
                 const Icon = STATUS_INFO[order.status].icon
@@ -125,13 +127,13 @@ export default function OrderTrackingPage() {
               })()}
             </motion.div>
             <div className="flex-1">
-              <p className="text-xs opacity-80 mb-0.5">Status do pedido</p>
-              <h2 className="text-xl font-extrabold leading-tight">{STATUS_INFO[order.status].label}</h2>
-              <p className="text-sm opacity-90 mt-1">{STATUS_INFO[order.status].desc}</p>
+              <p className="text-[10px] uppercase opacity-80 font-extrabold tracking-wider mb-0.5">Status do pedido</p>
+              <h2 className="font-display text-2xl leading-tight">{STATUS_INFO[order.status].label}</h2>
+              <p className="text-sm opacity-95 mt-1 leading-relaxed">{STATUS_INFO[order.status].desc}</p>
               {!isDelivered && (
-                <div className="flex items-center gap-1.5 mt-3 text-sm">
-                  <Clock className="w-4 h-4" />
-                  <span className="font-bold">Tempo estimado: {order.estimatedTime} min</span>
+                <div className="flex items-center gap-1.5 mt-3 text-sm bg-white/20 backdrop-blur rounded-full px-3 py-1.5 w-fit ring-1 ring-white/20">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span className="font-bold">Chega em ~{order.estimatedTime} min</span>
                 </div>
               )}
             </div>

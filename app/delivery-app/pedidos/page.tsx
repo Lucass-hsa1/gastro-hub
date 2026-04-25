@@ -60,29 +60,29 @@ export default function OrdersPage() {
   const list = tab === 'active' ? active : history
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <header className="sticky top-0 z-30 bg-white shadow-sm">
+    <div className="min-h-screen mesh-warm noise pb-24">
+      <header className="sticky top-0 z-30 bg-[#FFF7EE]/90 backdrop-blur-xl border-b border-orange-100/50">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <button onClick={() => router.push('/delivery-app')} className="w-9 h-9 hover:bg-gray-100 rounded-full flex items-center justify-center">
+          <button onClick={() => router.push('/delivery-app')} className="w-10 h-10 bg-white hover:bg-orange-50 rounded-2xl flex items-center justify-center shadow-sm ring-1 ring-orange-100">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="font-extrabold flex items-center gap-2">
-            <Receipt className="w-4 h-4 text-orange-500" /> Meus pedidos
+          <h1 className="font-display text-2xl flex items-center gap-2">
+            <Receipt className="w-5 h-5 text-orange-500" /> Meus pedidos
           </h1>
         </div>
-        <div className="max-w-3xl mx-auto px-4 pb-2 flex gap-1">
+        <div className="max-w-3xl mx-auto px-4 pb-3 flex gap-1.5 bg-white/60 backdrop-blur rounded-2xl p-1.5 mx-4 ring-1 ring-orange-100">
           <button
             onClick={() => setTab('active')}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-              tab === 'active' ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+            className={`flex-1 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all ${
+              tab === 'active' ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/30' : 'text-gray-600 hover:bg-white'
             }`}
           >
             Em andamento ({active.length})
           </button>
           <button
             onClick={() => setTab('history')}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-              tab === 'history' ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+            className={`flex-1 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all ${
+              tab === 'history' ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/30' : 'text-gray-600 hover:bg-white'
             }`}
           >
             Histórico ({history.length})
@@ -143,20 +143,20 @@ export default function OrdersPage() {
         )}
       </div>
 
-      {/* Bottom nav */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-2 grid grid-cols-3 gap-1">
-          <Link href="/delivery-app" className="flex flex-col items-center gap-0.5 py-2 text-gray-500 hover:text-orange-600">
+      {/* Bottom nav floating */}
+      <div className="fixed bottom-3 left-3 right-3 z-30 max-w-md mx-auto">
+        <div className="float-nav rounded-3xl px-2 py-2 grid grid-cols-3 gap-1">
+          <Link href="/delivery-app" className="flex flex-col items-center gap-0.5 py-2.5 rounded-2xl text-gray-600 hover:bg-white/60">
             <HomeIcon className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Início</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">Início</span>
           </Link>
-          <Link href="/delivery-app/pedidos" className="flex flex-col items-center gap-0.5 py-2 text-orange-600">
+          <Link href="/delivery-app/pedidos" className="flex flex-col items-center gap-0.5 py-2.5 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30">
             <Receipt className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Pedidos</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">Pedidos</span>
           </Link>
-          <Link href="/delivery-app/perfil" className="flex flex-col items-center gap-0.5 py-2 text-gray-500 hover:text-orange-600">
+          <Link href="/delivery-app/perfil" className="flex flex-col items-center gap-0.5 py-2.5 rounded-2xl text-gray-600 hover:bg-white/60">
             <UserIcon className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Perfil</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">Perfil</span>
           </Link>
         </div>
       </div>

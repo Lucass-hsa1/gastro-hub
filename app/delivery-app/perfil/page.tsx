@@ -27,19 +27,22 @@ export default function ProfilePage() {
   const points = Math.floor(totalSpent * 2)
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <header className="sticky top-0 z-30 bg-white shadow-sm">
+    <div className="min-h-screen mesh-warm noise pb-24">
+      <header className="sticky top-0 z-30 bg-[#FFF7EE]/90 backdrop-blur-xl border-b border-orange-100/50">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <button onClick={() => router.push('/delivery-app')} className="w-9 h-9 hover:bg-gray-100 rounded-full flex items-center justify-center">
+          <button onClick={() => router.push('/delivery-app')} className="w-10 h-10 bg-white hover:bg-orange-50 rounded-2xl flex items-center justify-center shadow-sm ring-1 ring-orange-100">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="font-extrabold">Meu perfil</h1>
+          <h1 className="font-display text-2xl">Meu perfil</h1>
         </div>
       </header>
 
       <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
         {/* User card */}
-        <div className="bg-gradient-to-br from-teal-600 via-teal-500 to-orange-500 text-white rounded-2xl p-5">
+        <div className="relative overflow-hidden bg-gradient-to-br from-teal-700 via-orange-500 to-pink-500 text-white rounded-3xl p-5 shadow-xl">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+          <div className="relative">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-2xl font-extrabold">
               {(mounted && authUser?.name?.[0]) || '👤'}
@@ -52,19 +55,20 @@ export default function ProfilePage() {
           </div>
           <div className="grid grid-cols-3 gap-3 pt-3 border-t border-white/20">
             <div>
-              <p className="text-xs opacity-80 uppercase font-bold">Pedidos</p>
-              <p className="text-xl font-extrabold">{totalOrders}</p>
+              <p className="text-[10px] opacity-80 uppercase font-extrabold tracking-wider">Pedidos</p>
+              <p className="text-2xl font-extrabold">{totalOrders}</p>
             </div>
             <div>
-              <p className="text-xs opacity-80 uppercase font-bold">Pontos</p>
-              <p className="text-xl font-extrabold">{points.toLocaleString('pt-BR')}</p>
+              <p className="text-[10px] opacity-80 uppercase font-extrabold tracking-wider">Pontos</p>
+              <p className="text-2xl font-extrabold">{points.toLocaleString('pt-BR')}</p>
             </div>
             <div>
-              <p className="text-xs opacity-80 uppercase font-bold">Nível</p>
-              <p className="text-xl font-extrabold flex items-center gap-1">
+              <p className="text-[10px] opacity-80 uppercase font-extrabold tracking-wider">Nível</p>
+              <p className="text-2xl font-extrabold flex items-center gap-1">
                 {totalSpent > 500 ? 'Ouro' : 'Prata'} <Award className="w-4 h-4" />
               </p>
             </div>
+          </div>
           </div>
         </div>
 
@@ -152,20 +156,20 @@ export default function ProfilePage() {
         <p className="text-center text-[10px] text-gray-400">GastroHub Delivery · MVP demo</p>
       </div>
 
-      {/* Bottom nav */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-2 grid grid-cols-3 gap-1">
-          <Link href="/delivery-app" className="flex flex-col items-center gap-0.5 py-2 text-gray-500 hover:text-orange-600">
+      {/* Bottom nav floating */}
+      <div className="fixed bottom-3 left-3 right-3 z-30 max-w-md mx-auto">
+        <div className="float-nav rounded-3xl px-2 py-2 grid grid-cols-3 gap-1">
+          <Link href="/delivery-app" className="flex flex-col items-center gap-0.5 py-2.5 rounded-2xl text-gray-600 hover:bg-white/60">
             <HomeIcon className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Início</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">Início</span>
           </Link>
-          <Link href="/delivery-app/pedidos" className="flex flex-col items-center gap-0.5 py-2 text-gray-500 hover:text-orange-600">
+          <Link href="/delivery-app/pedidos" className="flex flex-col items-center gap-0.5 py-2.5 rounded-2xl text-gray-600 hover:bg-white/60">
             <Receipt className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Pedidos</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">Pedidos</span>
           </Link>
-          <Link href="/delivery-app/perfil" className="flex flex-col items-center gap-0.5 py-2 text-orange-600">
+          <Link href="/delivery-app/perfil" className="flex flex-col items-center gap-0.5 py-2.5 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30">
             <UserIcon className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Perfil</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">Perfil</span>
           </Link>
         </div>
       </div>

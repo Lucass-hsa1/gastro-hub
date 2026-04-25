@@ -108,18 +108,18 @@ export default function CheckoutPage() {
   if (!restaurant || cart.length === 0) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
-      <header className="sticky top-0 z-30 bg-white shadow-sm">
+    <div className="min-h-screen mesh-warm noise pb-32">
+      <header className="sticky top-0 z-30 bg-[#FFF7EE]/90 backdrop-blur-xl border-b border-orange-100/50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => router.back()}
-            className="w-9 h-9 hover:bg-gray-100 rounded-full flex items-center justify-center"
+            className="w-10 h-10 bg-white hover:bg-orange-50 rounded-2xl flex items-center justify-center shadow-sm ring-1 ring-orange-100"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="font-extrabold">Finalizar pedido</h1>
-            <p className="text-xs text-gray-500">{restaurant.name}</p>
+            <p className="text-[10px] uppercase font-extrabold text-orange-600 tracking-wider">Finalizar</p>
+            <h1 className="font-display text-xl">{restaurant.name}</h1>
           </div>
         </div>
       </header>
@@ -323,13 +323,13 @@ export default function CheckoutPage() {
       </div>
 
       {/* Submit fixo */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 z-20">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#FFF7EE]/90 backdrop-blur-xl border-t border-orange-100 z-20">
         <button
           onClick={submit}
           disabled={submitting || !selectedAddress}
-          className="max-w-2xl mx-auto w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-extrabold flex items-center justify-center gap-2 disabled:opacity-50 hover:shadow-xl transition-all"
+          className="btn-glow max-w-2xl mx-auto w-full py-4 text-white rounded-2xl font-extrabold flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
         >
-          {submitting ? 'Processando...' : `Confirmar pedido · ${formatBRL(total)}`}
+          {submitting ? '⏳ Processando pedido...' : `Confirmar pedido · ${formatBRL(total)}`}
           {!submitting && <ChevronRight className="w-4 h-4" />}
         </button>
       </div>
