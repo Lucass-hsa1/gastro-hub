@@ -13,6 +13,7 @@ import {
   marketCategories,
   type MarketRestaurant,
 } from '@/lib/marketplace'
+import { restaurantBannerUrl } from '@/lib/food-images'
 import { useMarketStore } from '@/lib/marketplace-store'
 import { useStore } from '@/lib/store'
 
@@ -546,12 +547,24 @@ function RestaurantCard({
       }`}
     >
       {/* Banner */}
-      <div className={`relative h-32 bg-gradient-to-br ${r.banner} overflow-hidden`}>
-        {/* blob shape do emoji */}
-        <div className="absolute -right-4 top-1/2 -translate-y-1/2 text-[120px] leading-none opacity-90 group-hover:scale-110 group-hover:-translate-y-[42%] group-hover:rotate-6 transition-all duration-500">
-          {r.bannerEmoji}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+      <div className={`relative h-36 bg-gradient-to-br ${r.banner} overflow-hidden`}>
+        {r.coverPhotoId ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={restaurantBannerUrl(r.coverPhotoId, 600)}
+            alt={r.name}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none'
+            }}
+          />
+        ) : (
+          <div className="absolute -right-4 top-1/2 -translate-y-1/2 text-[120px] leading-none opacity-90 group-hover:scale-110 group-hover:-translate-y-[42%] group-hover:rotate-6 transition-all duration-500">
+            {r.bannerEmoji}
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
         {/* Top row badges */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">

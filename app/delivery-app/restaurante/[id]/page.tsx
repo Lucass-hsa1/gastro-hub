@@ -9,6 +9,7 @@ import {
   Search, Info, MapPin, Trash2, X, Sparkles, Share2, Flame
 } from 'lucide-react'
 import { getRestaurantById } from '@/lib/marketplace'
+import { dishImageUrl, restaurantBannerUrl } from '@/lib/food-images'
 import { useMarketStore } from '@/lib/marketplace-store'
 
 function formatBRL(v: number) {
@@ -110,19 +111,23 @@ export default function RestaurantPage() {
   return (
     <div className="min-h-screen mesh-warm noise pb-32">
       {/* Hero cinematográfico */}
-      <div className={`relative h-72 bg-gradient-to-br ${restaurant.banner} overflow-hidden`}>
-        {/* shapes decorativos */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="absolute top-1/2 right-[-10%] -translate-y-1/2 text-[280px] leading-none opacity-40 select-none"
-        >
-          {restaurant.bannerEmoji}
-        </motion.div>
-        <div className="absolute -top-12 -left-12 w-48 h-48 bg-white/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-12 right-1/3 w-56 h-56 bg-white/10 rounded-full blur-3xl" />
+      <div className={`relative h-80 bg-gradient-to-br ${restaurant.banner} overflow-hidden`}>
+        {restaurant.coverPhotoId && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <motion.img
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2, ease: 'easeOut' }}
+            src={restaurantBannerUrl(restaurant.coverPhotoId, 1200)}
+            alt={restaurant.name}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none'
+            }}
+          />
+        )}
+        {/* overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/70" />
 
         {/* Top bar */}
         <div className="relative z-10 max-w-3xl mx-auto p-4 flex items-center justify-between">
@@ -342,9 +347,26 @@ export default function RestaurantPage() {
 
                       <div className="flex flex-col items-center gap-2">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-orange-200 to-pink-200 rounded-2xl blur-md opacity-50 group-hover:opacity-80 transition-opacity" />
-                          <div className="relative w-24 h-24 bg-gradient-to-br from-orange-50 via-white to-pink-50 rounded-2xl flex items-center justify-center text-5xl ring-1 ring-orange-100 shadow-inner group-hover:scale-105 group-hover:rotate-3 transition-transform duration-500">
-                            {d.emoji}
+                          <div className="absolute inset-0 bg-gradient-to-br from-orange-300/60 to-pink-300/60 rounded-2xl blur-md opacity-60 group-hover:opacity-90 transition-opacity" />
+                          <div className="relative w-28 h-28 rounded-2xl ring-1 ring-orange-100 shadow-inner overflow-hidden group-hover:scale-[1.04] group-hover:rotate-1 transition-transform duration-500 bg-gradient-to-br from-orange-50 via-white to-pink-50">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={dishImageUrl(d, 240)}
+                              alt={d.name}
+                              loading="lazy"
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                target.style.display = 'none'
+                                if (target.parentElement) {
+                                  target.parentElement.classList.add('flex', 'items-center', 'justify-center')
+                                  const fallback = document.createElement('span')
+                                  fallback.textContent = d.emoji
+                                  fallback.style.fontSize = '3rem'
+                                  target.parentElement.appendChild(fallback)
+                                }
+                              }}
+                            />
                           </div>
                         </div>
                         {qty === 0 ? (

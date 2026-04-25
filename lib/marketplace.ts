@@ -18,7 +18,9 @@ export interface MarketRestaurant {
   cuisine: string
   cuisineEmoji: string
   logo: string
-  banner: string // gradient tailwind classes
+  /** Foto unsplash photo-id pra banner. Ex: '1568901346375-23c9450c58cd' */
+  coverPhotoId?: string
+  banner: string // gradient tailwind classes (fallback)
   bannerEmoji: string
   rating: number
   reviewCount: number
@@ -65,6 +67,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'lanches',
     cuisineEmoji: '🍔',
     logo: '🍔',
+    coverPhotoId: '1568901346375-23c9450c58cd',
     banner: 'from-orange-500 via-red-500 to-yellow-500',
     bannerEmoji: '🍔',
     rating: 4.8,
@@ -100,6 +103,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'pizza',
     cuisineEmoji: '🍕',
     logo: '🍕',
+    coverPhotoId: '1513104890138-7c749659a591',
     banner: 'from-red-600 via-orange-500 to-yellow-400',
     bannerEmoji: '🍕',
     rating: 4.9,
@@ -134,6 +138,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'japonesa',
     cuisineEmoji: '🍣',
     logo: '🍣',
+    coverPhotoId: '1579871494447-9811cf80d66c',
     banner: 'from-rose-500 via-pink-500 to-fuchsia-600',
     bannerEmoji: '🍣',
     rating: 4.7,
@@ -169,6 +174,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'italiana',
     cuisineEmoji: '🍝',
     logo: '🍝',
+    coverPhotoId: '1551892374-ecf8754cf8b0',
     banner: 'from-emerald-500 via-yellow-500 to-red-500',
     bannerEmoji: '🍝',
     rating: 4.6,
@@ -199,6 +205,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'brasileira',
     cuisineEmoji: '🍛',
     logo: '🍛',
+    coverPhotoId: '1565299507177-b0ac66763828',
     banner: 'from-amber-600 via-orange-600 to-yellow-500',
     bannerEmoji: '🍛',
     rating: 4.5,
@@ -230,6 +237,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'mexicana',
     cuisineEmoji: '🌮',
     logo: '🌮',
+    coverPhotoId: '1565299585323-38d6b0865b47',
     banner: 'from-red-600 via-orange-500 to-yellow-500',
     bannerEmoji: '🌮',
     rating: 4.7,
@@ -261,6 +269,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'doces',
     cuisineEmoji: '🍰',
     logo: '🍰',
+    coverPhotoId: '1565958011703-44f9829ba187',
     banner: 'from-pink-400 via-rose-500 to-fuchsia-600',
     bannerEmoji: '🍰',
     rating: 4.9,
@@ -294,6 +303,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'acai',
     cuisineEmoji: '🍇',
     logo: '🍇',
+    coverPhotoId: '1590301157890-4810ed352733',
     banner: 'from-purple-600 via-fuchsia-500 to-pink-500',
     bannerEmoji: '🍇',
     rating: 4.6,
@@ -325,6 +335,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'saudavel',
     cuisineEmoji: '🥗',
     logo: '🥗',
+    coverPhotoId: '1512621776951-a57141f2eefd',
     banner: 'from-emerald-400 via-green-500 to-lime-500',
     bannerEmoji: '🥗',
     rating: 4.8,
@@ -355,6 +366,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'padaria',
     cuisineEmoji: '🥐',
     logo: '🥐',
+    coverPhotoId: '1568827999250-3f6afff96e66',
     banner: 'from-yellow-500 via-amber-500 to-orange-500',
     bannerEmoji: '🥖',
     rating: 4.4,
@@ -385,6 +397,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'bebidas',
     cuisineEmoji: '🍺',
     logo: '🍺',
+    coverPhotoId: '1535958636474-b021ee887b13',
     banner: 'from-amber-600 via-yellow-600 to-orange-600',
     bannerEmoji: '🍻',
     rating: 4.7,
@@ -416,6 +429,7 @@ export const marketRestaurants: MarketRestaurant[] = [
     cuisine: 'lanches',
     cuisineEmoji: '🌱',
     logo: '🌱',
+    coverPhotoId: '1572802419224-296b0aeee0d9',
     banner: 'from-green-500 via-emerald-500 to-teal-500',
     bannerEmoji: '🌱',
     rating: 4.5,
