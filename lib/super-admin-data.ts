@@ -41,46 +41,48 @@ export interface PlatformRestaurant {
 }
 
 // Dados simulados (30 restaurantes brasileiros realistas, com variação)
+// Calibragem: faturamento médio ~R$ 10k/mês por restaurante (uns mais, uns menos).
+// Distribuição: ~5 grandes (15-22k/mês), ~12 médios (8-13k/mês), ~13 pequenos (4-7k/mês).
 export const platformRestaurants: PlatformRestaurant[] = [
   // == "Founders" — primeiros 5, desde dia 1 ==
-  { id: 'p1', name: 'Burger Boss', cuisine: 'Hambúrgueres', cuisineEmoji: '🍔', city: 'São Paulo', state: 'SP', region: 'Vila Madalena', plan: 'Pro', status: 'active', daysActive: 70, avgDailyOrders: 78, avgTicket: 52.40, rating: 4.8, founder: true, coverPhotoId: '1568901346375-23c9450c58cd' },
-  { id: 'p2', name: 'Pizza Roma', cuisine: 'Pizzaria', cuisineEmoji: '🍕', city: 'São Paulo', state: 'SP', region: 'Pinheiros', plan: 'Enterprise', status: 'active', daysActive: 70, avgDailyOrders: 96, avgTicket: 64.80, rating: 4.9, founder: true, coverPhotoId: '1513104890138-7c749659a591' },
-  { id: 'p3', name: 'Sushi Hana', cuisine: 'Japonesa', cuisineEmoji: '🍣', city: 'São Paulo', state: 'SP', region: 'Jardins', plan: 'Pro', status: 'active', daysActive: 70, avgDailyOrders: 54, avgTicket: 87.20, rating: 4.7, founder: true, coverPhotoId: '1579871494447-9811cf80d66c' },
-  { id: 'p4', name: 'Cantina Italiana Mama Lucia', cuisine: 'Italiana', cuisineEmoji: '🍝', city: 'São Paulo', state: 'SP', region: 'Vila Mariana', plan: 'Pro', status: 'active', daysActive: 70, avgDailyOrders: 48, avgTicket: 72.50, rating: 4.8, founder: true, coverPhotoId: '1551892374-ecf8754cf8b0' },
-  { id: 'p5', name: 'Açaí Tropical', cuisine: 'Açaí', cuisineEmoji: '🍇', city: 'São Paulo', state: 'SP', region: 'Itaim', plan: 'Starter', status: 'active', daysActive: 70, avgDailyOrders: 62, avgTicket: 28.90, rating: 4.6, founder: true, coverPhotoId: '1590301157890-4810ed352733' },
+  { id: 'p1', name: 'Burger Boss', cuisine: 'Hambúrgueres', cuisineEmoji: '🍔', city: 'São Paulo', state: 'SP', region: 'Vila Madalena', plan: 'Pro', status: 'active', daysActive: 70, avgDailyOrders: 14, avgTicket: 38.40, rating: 4.8, founder: true, coverPhotoId: '1568901346375-23c9450c58cd' },
+  { id: 'p2', name: 'Pizza Roma', cuisine: 'Pizzaria', cuisineEmoji: '🍕', city: 'São Paulo', state: 'SP', region: 'Pinheiros', plan: 'Enterprise', status: 'active', daysActive: 70, avgDailyOrders: 16, avgTicket: 48.20, rating: 4.9, founder: true, coverPhotoId: '1513104890138-7c749659a591' },
+  { id: 'p3', name: 'Sushi Hana', cuisine: 'Japonesa', cuisineEmoji: '🍣', city: 'São Paulo', state: 'SP', region: 'Jardins', plan: 'Pro', status: 'active', daysActive: 70, avgDailyOrders: 8, avgTicket: 62.50, rating: 4.7, founder: true, coverPhotoId: '1579871494447-9811cf80d66c' },
+  { id: 'p4', name: 'Cantina Italiana Mama Lucia', cuisine: 'Italiana', cuisineEmoji: '🍝', city: 'São Paulo', state: 'SP', region: 'Vila Mariana', plan: 'Pro', status: 'active', daysActive: 70, avgDailyOrders: 10, avgTicket: 52.30, rating: 4.8, founder: true, coverPhotoId: '1551892374-ecf8754cf8b0' },
+  { id: 'p5', name: 'Açaí Tropical', cuisine: 'Açaí', cuisineEmoji: '🍇', city: 'São Paulo', state: 'SP', region: 'Itaim', plan: 'Starter', status: 'active', daysActive: 70, avgDailyOrders: 14, avgTicket: 23.80, rating: 4.6, founder: true, coverPhotoId: '1590301157890-4810ed352733' },
 
   // == 5 entraram dia 14 (56 dias) ==
-  { id: 'p6', name: 'Empanadas del Sur', cuisine: 'Argentina', cuisineEmoji: '🥟', city: 'São Paulo', state: 'SP', region: 'Higienópolis', plan: 'Pro', status: 'active', daysActive: 56, avgDailyOrders: 44, avgTicket: 38.20, rating: 4.7 },
-  { id: 'p7', name: 'Bar do João', cuisine: 'Bar', cuisineEmoji: '🍺', city: 'Rio de Janeiro', state: 'RJ', region: 'Copacabana', plan: 'Pro', status: 'active', daysActive: 56, avgDailyOrders: 68, avgTicket: 56.40, rating: 4.5, coverPhotoId: '1535958636474-b021ee887b13' },
-  { id: 'p8', name: 'Padaria Pão de Ouro', cuisine: 'Padaria', cuisineEmoji: '🥐', city: 'São Paulo', state: 'SP', region: 'Tatuapé', plan: 'Starter', status: 'active', daysActive: 56, avgDailyOrders: 92, avgTicket: 24.80, rating: 4.6, coverPhotoId: '1568827999250-3f6afff96e66' },
-  { id: 'p9', name: 'Veg & Co.', cuisine: 'Vegana', cuisineEmoji: '🌱', city: 'São Paulo', state: 'SP', region: 'Pinheiros', plan: 'Starter', status: 'active', daysActive: 56, avgDailyOrders: 28, avgTicket: 46.90, rating: 4.9 },
-  { id: 'p10', name: 'Espetinho do Zé', cuisine: 'Churrascaria', cuisineEmoji: '🍢', city: 'Belo Horizonte', state: 'MG', region: 'Savassi', plan: 'Starter', status: 'active', daysActive: 56, avgDailyOrders: 56, avgTicket: 32.40, rating: 4.4 },
+  { id: 'p6', name: 'Empanadas del Sur', cuisine: 'Argentina', cuisineEmoji: '🥟', city: 'São Paulo', state: 'SP', region: 'Higienópolis', plan: 'Pro', status: 'active', daysActive: 56, avgDailyOrders: 8, avgTicket: 32.50, rating: 4.7 },
+  { id: 'p7', name: 'Bar do João', cuisine: 'Bar', cuisineEmoji: '🍺', city: 'Rio de Janeiro', state: 'RJ', region: 'Copacabana', plan: 'Pro', status: 'active', daysActive: 56, avgDailyOrders: 12, avgTicket: 41.80, rating: 4.5, coverPhotoId: '1535958636474-b021ee887b13' },
+  { id: 'p8', name: 'Padaria Pão de Ouro', cuisine: 'Padaria', cuisineEmoji: '🥐', city: 'São Paulo', state: 'SP', region: 'Tatuapé', plan: 'Starter', status: 'active', daysActive: 56, avgDailyOrders: 16, avgTicket: 22.40, rating: 4.6, coverPhotoId: '1568827999250-3f6afff96e66' },
+  { id: 'p9', name: 'Veg & Co.', cuisine: 'Vegana', cuisineEmoji: '🌱', city: 'São Paulo', state: 'SP', region: 'Pinheiros', plan: 'Starter', status: 'active', daysActive: 56, avgDailyOrders: 6, avgTicket: 38.50, rating: 4.9 },
+  { id: 'p10', name: 'Espetinho do Zé', cuisine: 'Churrascaria', cuisineEmoji: '🍢', city: 'Belo Horizonte', state: 'MG', region: 'Savassi', plan: 'Starter', status: 'active', daysActive: 56, avgDailyOrders: 12, avgTicket: 27.90, rating: 4.4 },
 
   // == 8 entraram dia 30 (40 dias) ==
-  { id: 'p11', name: 'Hamburgueria do Bairro', cuisine: 'Hambúrgueres', cuisineEmoji: '🍔', city: 'Curitiba', state: 'PR', region: 'Batel', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 52, avgTicket: 48.30, rating: 4.7 },
-  { id: 'p12', name: 'Pizzaria Forno a Lenha', cuisine: 'Pizzaria', cuisineEmoji: '🍕', city: 'Porto Alegre', state: 'RS', region: 'Moinhos', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 71, avgTicket: 58.90, rating: 4.8 },
-  { id: 'p13', name: 'Doceria Sweet', cuisine: 'Doceria', cuisineEmoji: '🍰', city: 'São Paulo', state: 'SP', region: 'Moema', plan: 'Starter', status: 'active', daysActive: 40, avgDailyOrders: 38, avgTicket: 35.80, rating: 4.9, coverPhotoId: '1565958011703-44f9829ba187' },
-  { id: 'p14', name: 'Marmitaria Fitness', cuisine: 'Saudável', cuisineEmoji: '🥗', city: 'São Paulo', state: 'SP', region: 'Brooklin', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 84, avgTicket: 32.50, rating: 4.6 },
-  { id: 'p15', name: 'Tacos & Tequila', cuisine: 'Mexicana', cuisineEmoji: '🌮', city: 'São Paulo', state: 'SP', region: 'Vila Madalena', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 46, avgTicket: 54.20, rating: 4.7 },
-  { id: 'p16', name: 'Sorveteria Gelato Italiano', cuisine: 'Sorveteria', cuisineEmoji: '🍨', city: 'São Paulo', state: 'SP', region: 'Jardins', plan: 'Starter', status: 'active', daysActive: 40, avgDailyOrders: 64, avgTicket: 22.40, rating: 4.5 },
-  { id: 'p17', name: 'Comida da Vovó', cuisine: 'Brasileira', cuisineEmoji: '🍛', city: 'Recife', state: 'PE', region: 'Boa Viagem', plan: 'Starter', status: 'active', daysActive: 40, avgDailyOrders: 72, avgTicket: 28.60, rating: 4.6 },
-  { id: 'p18', name: 'Crepe Express', cuisine: 'Crepes', cuisineEmoji: '🥞', city: 'São Paulo', state: 'SP', region: 'Pinheiros', plan: 'Starter', status: 'churned', daysActive: 28, avgDailyOrders: 18, avgTicket: 24.30, rating: 3.9 },
+  { id: 'p11', name: 'Hamburgueria do Bairro', cuisine: 'Hambúrgueres', cuisineEmoji: '🍔', city: 'Curitiba', state: 'PR', region: 'Batel', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 10, avgTicket: 38.20, rating: 4.7 },
+  { id: 'p12', name: 'Pizzaria Forno a Lenha', cuisine: 'Pizzaria', cuisineEmoji: '🍕', city: 'Porto Alegre', state: 'RS', region: 'Moinhos', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 14, avgTicket: 47.50, rating: 4.8 },
+  { id: 'p13', name: 'Doceria Sweet', cuisine: 'Doceria', cuisineEmoji: '🍰', city: 'São Paulo', state: 'SP', region: 'Moema', plan: 'Starter', status: 'active', daysActive: 40, avgDailyOrders: 8, avgTicket: 29.90, rating: 4.9, coverPhotoId: '1565958011703-44f9829ba187' },
+  { id: 'p14', name: 'Marmitaria Fitness', cuisine: 'Saudável', cuisineEmoji: '🥗', city: 'São Paulo', state: 'SP', region: 'Brooklin', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 18, avgTicket: 28.20, rating: 4.6 },
+  { id: 'p15', name: 'Tacos & Tequila', cuisine: 'Mexicana', cuisineEmoji: '🌮', city: 'São Paulo', state: 'SP', region: 'Vila Madalena', plan: 'Pro', status: 'active', daysActive: 40, avgDailyOrders: 9, avgTicket: 41.80, rating: 4.7 },
+  { id: 'p16', name: 'Sorveteria Gelato Italiano', cuisine: 'Sorveteria', cuisineEmoji: '🍨', city: 'São Paulo', state: 'SP', region: 'Jardins', plan: 'Starter', status: 'active', daysActive: 40, avgDailyOrders: 14, avgTicket: 21.90, rating: 4.5 },
+  { id: 'p17', name: 'Comida da Vovó', cuisine: 'Brasileira', cuisineEmoji: '🍛', city: 'Recife', state: 'PE', region: 'Boa Viagem', plan: 'Starter', status: 'active', daysActive: 40, avgDailyOrders: 14, avgTicket: 23.50, rating: 4.6 },
+  { id: 'p18', name: 'Crepe Express', cuisine: 'Crepes', cuisineEmoji: '🥞', city: 'São Paulo', state: 'SP', region: 'Pinheiros', plan: 'Starter', status: 'churned', daysActive: 28, avgDailyOrders: 6, avgTicket: 22.40, rating: 3.9 },
 
   // == 7 entraram dia 50 (20 dias) ==
-  { id: 'p19', name: 'Yakisoba Master', cuisine: 'Asiática', cuisineEmoji: '🍜', city: 'São Paulo', state: 'SP', region: 'Liberdade', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 58, avgTicket: 42.80, rating: 4.5 },
-  { id: 'p20', name: 'Café Bistrô do Centro', cuisine: 'Café', cuisineEmoji: '☕', city: 'São Paulo', state: 'SP', region: 'Centro', plan: 'Starter', status: 'active', daysActive: 20, avgDailyOrders: 42, avgTicket: 26.90, rating: 4.4 },
-  { id: 'p21', name: 'Boteco do Mineiro', cuisine: 'Brasileira', cuisineEmoji: '🍻', city: 'Belo Horizonte', state: 'MG', region: 'Lourdes', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 88, avgTicket: 48.20, rating: 4.7 },
-  { id: 'p22', name: 'Pasta & Basta', cuisine: 'Italiana', cuisineEmoji: '🍝', city: 'Florianópolis', state: 'SC', region: 'Centro', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 36, avgTicket: 64.50, rating: 4.8 },
-  { id: 'p23', name: 'Pastel Express', cuisine: 'Pastéis', cuisineEmoji: '🥟', city: 'Salvador', state: 'BA', region: 'Pituba', plan: 'Starter', status: 'active', daysActive: 20, avgDailyOrders: 76, avgTicket: 18.90, rating: 4.3 },
-  { id: 'p24', name: 'Espaço Fit Bowls', cuisine: 'Saudável', cuisineEmoji: '🥗', city: 'São Paulo', state: 'SP', region: 'Itaim', plan: 'Starter', status: 'active', daysActive: 20, avgDailyOrders: 32, avgTicket: 38.90, rating: 4.7 },
-  { id: 'p25', name: 'Sushi Express', cuisine: 'Japonesa', cuisineEmoji: '🍣', city: 'Brasília', state: 'DF', region: 'Asa Sul', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 48, avgTicket: 76.40, rating: 4.6 },
+  { id: 'p19', name: 'Yakisoba Master', cuisine: 'Asiática', cuisineEmoji: '🍜', city: 'São Paulo', state: 'SP', region: 'Liberdade', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 11, avgTicket: 34.80, rating: 4.5 },
+  { id: 'p20', name: 'Café Bistrô do Centro', cuisine: 'Café', cuisineEmoji: '☕', city: 'São Paulo', state: 'SP', region: 'Centro', plan: 'Starter', status: 'active', daysActive: 20, avgDailyOrders: 10, avgTicket: 24.20, rating: 4.4 },
+  { id: 'p21', name: 'Boteco do Mineiro', cuisine: 'Brasileira', cuisineEmoji: '🍻', city: 'Belo Horizonte', state: 'MG', region: 'Lourdes', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 16, avgTicket: 38.20, rating: 4.7 },
+  { id: 'p22', name: 'Pasta & Basta', cuisine: 'Italiana', cuisineEmoji: '🍝', city: 'Florianópolis', state: 'SC', region: 'Centro', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 8, avgTicket: 51.50, rating: 4.8 },
+  { id: 'p23', name: 'Pastel Express', cuisine: 'Pastéis', cuisineEmoji: '🥟', city: 'Salvador', state: 'BA', region: 'Pituba', plan: 'Starter', status: 'active', daysActive: 20, avgDailyOrders: 14, avgTicket: 17.90, rating: 4.3 },
+  { id: 'p24', name: 'Espaço Fit Bowls', cuisine: 'Saudável', cuisineEmoji: '🥗', city: 'São Paulo', state: 'SP', region: 'Itaim', plan: 'Starter', status: 'active', daysActive: 20, avgDailyOrders: 8, avgTicket: 31.80, rating: 4.7 },
+  { id: 'p25', name: 'Sushi Express', cuisine: 'Japonesa', cuisineEmoji: '🍣', city: 'Brasília', state: 'DF', region: 'Asa Sul', plan: 'Pro', status: 'active', daysActive: 20, avgDailyOrders: 9, avgTicket: 57.40, rating: 4.6 },
 
   // == 5 entraram dia 60 (10 dias) ==
-  { id: 'p26', name: 'Burguer Premium', cuisine: 'Hambúrgueres', cuisineEmoji: '🍔', city: 'Goiânia', state: 'GO', region: 'Setor Bueno', plan: 'Pro', status: 'active', daysActive: 10, avgDailyOrders: 38, avgTicket: 56.20, rating: 4.6 },
-  { id: 'p27', name: 'Açaí da Vila', cuisine: 'Açaí', cuisineEmoji: '🍇', city: 'Fortaleza', state: 'CE', region: 'Aldeota', plan: 'Starter', status: 'onboarding', daysActive: 10, avgDailyOrders: 24, avgTicket: 24.80, rating: 4.5 },
-  { id: 'p28', name: 'Casa do Pão', cuisine: 'Padaria', cuisineEmoji: '🥖', city: 'Vitória', state: 'ES', region: 'Praia do Canto', plan: 'Starter', status: 'active', daysActive: 10, avgDailyOrders: 64, avgTicket: 22.60, rating: 4.4 },
-  { id: 'p29', name: 'Pizzaria Bella Vista', cuisine: 'Pizzaria', cuisineEmoji: '🍕', city: 'Manaus', state: 'AM', region: 'Adrianópolis', plan: 'Pro', status: 'onboarding', daysActive: 8, avgDailyOrders: 28, avgTicket: 52.30, rating: 4.5 },
-  { id: 'p30', name: 'Brigaderia Doce Tentação', cuisine: 'Doceria', cuisineEmoji: '🍫', city: 'Natal', state: 'RN', region: 'Ponta Negra', plan: 'Starter', status: 'trial', daysActive: 5, avgDailyOrders: 16, avgTicket: 31.20, rating: 4.8 },
+  { id: 'p26', name: 'Burguer Premium', cuisine: 'Hambúrgueres', cuisineEmoji: '🍔', city: 'Goiânia', state: 'GO', region: 'Setor Bueno', plan: 'Pro', status: 'active', daysActive: 10, avgDailyOrders: 9, avgTicket: 41.80, rating: 4.6 },
+  { id: 'p27', name: 'Açaí da Vila', cuisine: 'Açaí', cuisineEmoji: '🍇', city: 'Fortaleza', state: 'CE', region: 'Aldeota', plan: 'Starter', status: 'onboarding', daysActive: 10, avgDailyOrders: 8, avgTicket: 22.50, rating: 4.5 },
+  { id: 'p28', name: 'Casa do Pão', cuisine: 'Padaria', cuisineEmoji: '🥖', city: 'Vitória', state: 'ES', region: 'Praia do Canto', plan: 'Starter', status: 'active', daysActive: 10, avgDailyOrders: 12, avgTicket: 19.80, rating: 4.4 },
+  { id: 'p29', name: 'Pizzaria Bella Vista', cuisine: 'Pizzaria', cuisineEmoji: '🍕', city: 'Manaus', state: 'AM', region: 'Adrianópolis', plan: 'Pro', status: 'onboarding', daysActive: 8, avgDailyOrders: 8, avgTicket: 41.30, rating: 4.5 },
+  { id: 'p30', name: 'Brigaderia Doce Tentação', cuisine: 'Doceria', cuisineEmoji: '🍫', city: 'Natal', state: 'RN', region: 'Ponta Negra', plan: 'Starter', status: 'trial', daysActive: 5, avgDailyOrders: 6, avgTicket: 27.50, rating: 4.8 },
 ]
 
 // ===== Cálculos derivados =====
